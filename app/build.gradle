@@ -1,0 +1,17 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group 'app'
+version '1.0-SNAPSHOT'
+
+mainClassName="controller.Controller"
+
+repositories {
+    mavenCentral()
+}
+
+jar {
+    manifest.attributes("Main-Class": "mainClassName");
+}
