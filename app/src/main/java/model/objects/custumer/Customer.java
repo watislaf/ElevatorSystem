@@ -1,29 +1,43 @@
 package model.objects.custumer;
 
-import model.objects.MovingObject;
+import model.objects.MovingObject.MovingObject;
 
 import java.awt.*;
-import java.awt.geom.Point2D;
 import java.util.Random;
 
 import lombok.Getter;
+import model.objects.MovingObject.Vector2D;
+
 
 public class Customer extends MovingObject {
-    private final int FLOOR_START;
-    private final int FLOOR_END;
-
     @Getter
-    private CustomerState state = CustomerState.GO_TO_BUTTON;
+    private int currentFlor;
+    private int floorEnd;
 
+    public void setState(CustomerState state) {
+        if (state.equals(state)) {
+            return;
+        }
+        switch (state) {
+            case GO_TO_BUTTON, GET_OUT, GET_IN -> {
+                setReachedDestination(false);
+            }
 
-    public Customer(int floor_start, int floor_end, Point2D.Double position, Point size) {
-        super(position, new Random()
-                .doubles(5., 10.)
-                .findAny()
-                .getAsDouble(), size);
-
-        this.FLOOR_END = floor_end;
-        this.FLOOR_START = floor_start;
+        }
+        this.state = state;
     }
 
+    @Getter
+    private CustomerState state;
+
+
+    public Customer(int currentFlor, int floorEnd, Vector2D position, double speed ,Point size) {
+        super(position, speed, size);
+        this.currentFlor = currentFlor;
+        this.floorEnd = floorEnd;
+    }
+
+    public boolean wantsGoUp() {
+        return currentFlor < floorEnd;
+    }
 }

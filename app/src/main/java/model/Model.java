@@ -1,7 +1,7 @@
 package model;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import model.objects.building.Building;
 import model.objects.custumer.Customer;
@@ -11,7 +11,7 @@ import java.util.List;
 
 @Getter
 @Setter
-@AllArgsConstructor
+@NoArgsConstructor
 public class Model {
     private List<Customer> customers;
     private Building building;
