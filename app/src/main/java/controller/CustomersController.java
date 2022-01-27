@@ -26,10 +26,10 @@ public class CustomersController {
         for (var customer : MODEL.getCustomers()) {
             switch (customer.getState()) {
                 case GO_TO_BUTTON -> {
-                    CustomerGoToButton(customer);
+                    processGotOButton(customer);
                 }
                 case WAIT_UNTIL_ARRIVED -> {
-                    CustomerWaitUntilArrived(customer);
+                    processWaitUntillArrived(customer);
                 }
                 case GET_IN -> {
 
@@ -45,7 +45,7 @@ public class CustomersController {
         }
     }
 
-    private void CustomerWaitUntilArrived(Customer customer) {
+    private void processWaitUntillArrived(Customer customer) {
 
         var elevatorPosition = MODEL.getBuilding()
                 .getNearestOpenedElevatorOnFloor(customer.getPosition(), customer.getCurrentFlor());
@@ -54,7 +54,7 @@ public class CustomersController {
         }
     }
 
-    private void CustomerGoToButton(Customer customer) {
+    private void processGotOButton(Customer customer) {
         if (!customer.isReachedDestination()) {
             var buttonPosition = MODEL.getBuilding()
                     .getNearestButtonOnFloor(customer.getPosition(), customer.getCurrentFlor());

@@ -1,26 +1,29 @@
 package connector;
 
-import lombok.AllArgsConstructor;
+import connector.protocol.ProtocolMessage;
+import lombok.*;
 
 import java.io.*;
-import java.util.Arrays;
 
 @AllArgsConstructor
 public class StreamReader extends Thread {
-    private final BufferedReader READER;
-    private final OnReceive CALLABLE;
-    
+    private final ObjectInputStream READER;
+    private final OnSocketEvent CALLABLE;
+
     @Override
     public void run() {
+
         while (true) {
             try {
-                String message = READER.readLine();
+                ProtocolMessage message = (ProtocolMessage) READER.readObject();
                 CALLABLE.onReceive(message);
                 if (message == null) {
                     break;
                 }
             } catch (IOException e) {
-                System.out.println(Arrays.toString(e.getStackTrace()));
+                System.out.println(e);
+            } catch (ClassNotFoundException e) {
+                System.out.println(e);
             }
         }
     }

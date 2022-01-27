@@ -1,35 +1,33 @@
 package connector;
 
+import connector.protocol.Protocol;
+import connector.protocol.ProtocolMessage;
+
 import java.io.*;
 import java.net.Socket;
 import java.rmi.UnknownHostException;
-import java.util.Locale;
 
-public class Client implements OnReceive {
+public class Client {
+    private ObjectOutputStream outputStream;
     private Socket SOCKET;
 
-    public void Send(String message) {
+    public void Send(ProtocolMessage message) {
         try {
-            OutputStream output = SOCKET.getOutputStream();
-            PrintWriter writer = new PrintWriter(output, true);
-            writer.println(message);
+            outputStream.writeObject(message);
         } catch (IOException e) {
             System.out.println(e.toString());
         }
     }
 
-    @Override
-    public void onReceive(String message) {
-        System.out.println(message);
-    }
-
-    public Client(String hostname, OnReceive receivable) {
+    public Client(String hostname, OnSocketEvent receivable) {
         try {
             SOCKET = new Socket(hostname, ConnectionSettings.PORT);
-            new StreamReader(
-                    new BufferedReader(
-                            new InputStreamReader(SOCKET.getInputStream())
-                    ), receivable).start();
+            outputStream = new ObjectOutputStream(SOCKET.getOutputStream());
+            var inputStream = new ObjectInputStream(SOCKET.getInputStream());
+
+            receivable.onNewConnection(new DataClient(outputStream, SOCKET));
+            new StreamReader(inputStream, receivable).start();
+
         } catch (UnknownHostException ex) {
             System.out.println("Server not found: " + ex.getMessage());
         } catch (IOException ex) {

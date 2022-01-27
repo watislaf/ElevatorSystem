@@ -1,21 +1,29 @@
 package controller;
 
-import connector.ConnectionSettings;
-import connector.OnReceive;
+import connector.DataClient;
+import connector.OnSocketEvent;
+import connector.protocol.ProtocolMessage;
+import lombok.Setter;
 import view.SwingWindow;
 import connector.Client;
 
 import java.util.concurrent.TimeUnit;
 
-public class Controller implements OnReceive {
+public class Controller implements OnSocketEvent {
+    @Setter
+    Client client;
 
     @Override
-    public void onReceive(String message) {
-        System.out.println(message);
+    public void onReceive(ProtocolMessage message) {
+        System.out.println("RESIEVED");
+    }
+
+    @Override
+    public void onNewConnection(DataClient message) {
+        System.out.println("connecterd");
     }
 
     public void start() throws InterruptedException {
-        Client client = new Client(ConnectionSettings.HOST, this);
         SwingWindow gui = new SwingWindow();
         gui.startWindow();
 
@@ -24,4 +32,5 @@ public class Controller implements OnReceive {
             TimeUnit.SECONDS.sleep(1);
         }
     }
+
 }

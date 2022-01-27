@@ -1,32 +1,35 @@
 package connector;
 
+import connector.protocol.ProtocolMessage;
+import lombok.AllArgsConstructor;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
 
 public class Server extends Thread {
-    final OnReceive receivable;
+    final OnSocketEvent eventHandler;
+    LinkedList<DataClient> connected;
 
-    LinkedList<Socket> connected;
-
-    public Server(OnReceive receivable) {
-        this.receivable = receivable;
-        connected = new LinkedList<Socket>();
+    public Server(OnSocketEvent eventHandler) {
+        this.eventHandler = eventHandler;
+        connected = new LinkedList<DataClient>();
         this.start();
     }
 
+    public void Send(ProtocolMessage message) {
+        connected.removeIf(DataClient::isClosed);
+        for (DataClient client : connected) {
+            Send(client, message);
+        }
+    }
 
-    public void Send(String message) {
-        connected.removeIf(Socket::isClosed);
-        for (Socket socket : connected) {
-            try {
-                OutputStream output = socket.getOutputStream();
-                PrintWriter writer = new PrintWriter(output, true);
-                writer.println(message);
-            } catch (IOException e) {
-                System.out.println(e.toString());
-            }
+    public void Send(DataClient client, ProtocolMessage message) {
+        try {
+            client.STREAM.writeObject(message);
+        } catch (IOException e) {
+            System.out.println(e.toString());
         }
     }
 
@@ -36,11 +39,12 @@ public class Server extends Thread {
             System.out.println("Server is listening on port " + ConnectionSettings.PORT);
             while (true) {
                 Socket socket = serverSocket.accept();
-                connected.add(socket);
-                new StreamReader(
-                        new BufferedReader(
-                                new InputStreamReader(socket.getInputStream()))
-                        , receivable).start();
+                ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+                new StreamReader(new ObjectInputStream(socket.getInputStream()), eventHandler).start();
+                var dataClient = new DataClient(outputStream, socket);
+                connected.add(dataClient);
+                Send(dataClient, new ProtocolMessage());
+                eventHandler.onNewConnection(dataClient);
             }
         } catch (IOException ex) {
             System.out.println("Server exception: " + ex.getMessage());

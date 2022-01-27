@@ -28,7 +28,7 @@ public class Customer extends MovingObject {
     }
 
     @Getter
-    private CustomerState state;
+    private CustomerState state = CustomerState.GO_TO_BUTTON;
 
 
     public Customer(int currentFlor, int floorEnd, Vector2D position, double speed ,Point size) {

@@ -1,18 +1,35 @@
 package controller;
 
-import connector.OnReceive;
+import connector.DataClient;
+import connector.OnSocketEvent;
+import connector.Server;
+import connector.protocol.ProtocolMessage;
+import lombok.Setter;
 import model.Model;
 import model.objects.building.Building;
 
 import java.util.concurrent.TimeUnit;
 
-public class Controller implements OnReceive {
+public class Controller implements OnSocketEvent {
     static private final int TPS = 300;
-    private final Building DEFAULT_BUILDING = new Building(new ElevatorSystemSettings(), 5, 4);
+    private final Building DEFAULT_BUILDING = new Building(
+            new ElevatorSystemSettings(), 5, 4);
 
     private final ElevatorSystemController ELEVATOR_SYSTEM_CONTROLLER;
     private final CustomersController CUSTUMER_CONTROLLER;
     private final Model MODEL;
+    @Setter
+    private Server server;
+
+    @Override
+    public void onReceive(ProtocolMessage message) {
+        System.out.println("RECIEVED");
+    }
+
+    @Override
+    public void onNewConnection(DataClient client) {
+        System.out.println("CONNECTED");
+    }
 
     public Controller(Model model) {
         this.MODEL = model;
@@ -22,13 +39,10 @@ public class Controller implements OnReceive {
         model.Initialize(DEFAULT_BUILDING);
     }
 
-    @Override
-    public void onReceive(String message) {
-        System.out.println(message);
-    }
 
     public void start() throws InterruptedException {
         long lastTime = System.currentTimeMillis();
+
         while (true) {
             TimeUnit.MILLISECONDS.sleep(Math.round(1000. / TPS));
             long deltaTime = System.currentTimeMillis() - lastTime;
@@ -38,4 +52,5 @@ public class Controller implements OnReceive {
             ELEVATOR_SYSTEM_CONTROLLER.tick(deltaTime);
         }
     }
+
 }
