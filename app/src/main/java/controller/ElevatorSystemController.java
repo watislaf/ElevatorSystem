@@ -1,11 +1,13 @@
 package controller;
 
+import lombok.AllArgsConstructor;
 import model.Model;
 
+@AllArgsConstructor
 public class ElevatorSystemController {
     private final Model MODEL;
 
-    public ElevatorSystemController(Model model) {
-        this.MODEL = model;
+    public void tick(long delta_time) {
+
     }
 }

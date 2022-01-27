@@ -2,7 +2,7 @@ package drawable.objects;
 
 import drawable.Drawable;
 
-import model.objects.Customer;
+import model.objects.custumer.Customer;
 
 import java.awt.*;
 

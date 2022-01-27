@@ -4,7 +4,6 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
-import java.util.concurrent.TimeUnit;
 
 public class Server extends Thread {
     final OnReceive receivable;
@@ -38,7 +37,10 @@ public class Server extends Thread {
             while (true) {
                 Socket socket = serverSocket.accept();
                 connected.add(socket);
-                new StreamReader(socket.getInputStream(), receivable).start();
+                new StreamReader(
+                        new BufferedReader(
+                                new InputStreamReader(socket.getInputStream()))
+                        , receivable).start();
             }
         } catch (IOException ex) {
             System.out.println("Server exception: " + ex.getMessage());

@@ -26,7 +26,10 @@ public class Client implements OnReceive {
     public Client(String hostname, OnReceive receivable) {
         try {
             SOCKET = new Socket(hostname, ConnectionSettings.PORT);
-            new StreamReader(SOCKET.getInputStream(), receivable).start();
+            new StreamReader(
+                    new BufferedReader(
+                            new InputStreamReader(SOCKET.getInputStream())
+                    ), receivable).start();
         } catch (UnknownHostException ex) {
             System.out.println("Server not found: " + ex.getMessage());
         } catch (IOException ex) {

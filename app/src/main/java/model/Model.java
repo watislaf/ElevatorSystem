@@ -1,17 +1,23 @@
 package model;
 
-import model.objects.Building;
-import model.objects.Customer;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import model.objects.building.Building;
+import model.objects.custumer.Customer;
 
 import java.util.LinkedList;
 import java.util.List;
 
+@Getter
+@Setter
+@AllArgsConstructor
 public class Model {
-    List<Customer> customers;
-    Building building;
+    private List<Customer> customers;
+    private Building building;
 
     public void Initialize(Building building) {
-        this.building = (Building) building.cloneObj();
+        this.building = building;
         this.customers = new LinkedList<>();
     }
 }

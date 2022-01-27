@@ -1,17 +1,15 @@
 package connector;
 
+import lombok.AllArgsConstructor;
+
 import java.io.*;
 import java.util.Arrays;
 
+@AllArgsConstructor
 public class StreamReader extends Thread {
     private final BufferedReader READER;
     private final OnReceive CALLABLE;
-
-    StreamReader(InputStream input, OnReceive callable) {
-        this.READER = new BufferedReader(new InputStreamReader(input));
-        this.CALLABLE = callable;
-    }
-
+    
     @Override
     public void run() {
         while (true) {

@@ -3,10 +3,10 @@ plugins {
     id 'application'
 }
 
-group 'org.example2'
+group 'window'
 version '1.0-SNAPSHOT'
 
-mainClassName = "controller.Controller"
+mainClassName = "controller.Main"
 
 dependencies {
     implementation project(':app')

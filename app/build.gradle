@@ -6,7 +6,7 @@ plugins {
 group 'app'
 version '1.0-SNAPSHOT'
 
-mainClassName="controller.Controller"
+mainClassName="controller.Main"
 
 repositories {
     mavenCentral()
@@ -15,3 +15,10 @@ repositories {
 jar {
     manifest.attributes("Main-Class": "mainClassName");
 }
+
+dependencies {
+    implementation 'org.jetbrains:annotations:20.1.0'
+}
+
+sourceCompatibility = JavaVersion.VERSION_16
+targetCompatibility = JavaVersion.VERSION_16
