@@ -1,17 +1,24 @@
 package connector;
 
-import connector.protocol.Protocol;
 import connector.protocol.ProtocolMessage;
 
 import java.io.*;
 import java.net.Socket;
 import java.rmi.UnknownHostException;
+import java.util.concurrent.TimeUnit;
 
 public class Client {
     private ObjectOutputStream outputStream;
-    private Socket SOCKET;
+    private Socket socket;
 
-    public void Send(ProtocolMessage message) {
+    public boolean isConnected() {
+        if (socket == null) {
+            return false;
+        }
+        return socket.isConnected();
+    }
+
+    public void send(ProtocolMessage message) {
         try {
             outputStream.writeObject(message);
         } catch (IOException e) {
@@ -19,19 +26,24 @@ public class Client {
         }
     }
 
-    public Client(String hostname, OnSocketEvent receivable) {
-        try {
-            SOCKET = new Socket(hostname, ConnectionSettings.PORT);
-            outputStream = new ObjectOutputStream(SOCKET.getOutputStream());
-            var inputStream = new ObjectInputStream(SOCKET.getInputStream());
+    public void connect(String hostname, OnSocketEvent receivable) {
+        while (true) {
+            try {
+                socket = new Socket(hostname, ConnectionSettings.PORT);
+                outputStream = new ObjectOutputStream(socket.getOutputStream());
+                var inputStream = new ObjectInputStream(socket.getInputStream());
 
-            receivable.onNewConnection(new DataClient(outputStream, SOCKET));
-            new StreamReader(inputStream, receivable).start();
-
-        } catch (UnknownHostException ex) {
-            System.out.println("Server not found: " + ex.getMessage());
-        } catch (IOException ex) {
-            System.out.println("I/O error: " + ex.getMessage());
+                receivable.onNewConnection(new DataClient(outputStream, socket));
+                new StreamReader(inputStream, receivable).start();
+                return;
+            } catch (IOException e) {
+                System.out.println(e);
+            }
+            try {
+                TimeUnit.MILLISECONDS.sleep(Math.round(400.));
+            } catch (InterruptedException e) {
+                System.out.println(e);
+            }
         }
     }
 

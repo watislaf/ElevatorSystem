@@ -1,19 +1,17 @@
 package drawable.objects;
 
 import drawable.Drawable;
-
 import model.objects.MovingObject.Creature;
 import model.objects.MovingObject.Vector2D;
-import model.objects.custumer.Customer;
 
 import java.awt.*;
 
-public class DrawableCustomer extends Creature implements Drawable {
-    public DrawableCustomer(Vector2D position, Point size) {
+public class DrawableElevator extends Creature implements Drawable {
+    public DrawableElevator(Vector2D position, Point size) {
         super(position, size);
     }
 
-    public DrawableCustomer(Creature creature) {
+    public DrawableElevator(Creature creature) {
         super(creature);
     }
 

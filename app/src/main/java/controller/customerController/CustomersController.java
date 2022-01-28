@@ -1,7 +1,10 @@
-package controller;
+package controller.customerController;
 
-import lombok.AllArgsConstructor;
+import controller.elevatorSystemController.ElevatorSystemController;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import model.Model;
+import model.objects.MovingObject.Vector2D;
 import model.objects.custumer.Customer;
 import model.objects.custumer.CustomerState;
 import model.objects.elevator.ElevatorRequest;
@@ -9,14 +12,17 @@ import model.objects.elevator.ElevatorRequest;
 import java.awt.*;
 import java.util.Random;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class CustomersController {
     private final Model MODEL;
+
+    @Getter
+    public final CustomerSettings SETTINGS = new CustomerSettings();
     private final ElevatorSystemController elevatorSystemController;
 
     public void tick(long deltaTime) {
         if (MODEL.getCustomers().isEmpty()) {
-            CreateCustomer(0, 4, new CustomerSettings().CUSTOMER_SIZE,
+            CreateCustomer(0, 4, SETTINGS.CUSTOMER_SIZE,
                     new Random()
                             .doubles(5., 10.)
                             .findAny()
@@ -67,9 +73,15 @@ public class CustomersController {
     }
 
     private void CreateCustomer(int floorStart, int floorEnd, Point customer_size, double speed) {
+        Vector2D start_position = MODEL.getBuilding().getStartPosition(floorStart);
+        // So u can't see customer whet it spawns
+        if (start_position.x == 0) {
+            start_position.x -= SETTINGS.CUSTOMER_SIZE.x / 2.;
+        } else {
+            start_position.x += SETTINGS.CUSTOMER_SIZE.x / 2.;
+        }
         var customer = new Customer(
-                floorStart, floorEnd,
-                MODEL.getBuilding().getStartPosition(floorStart), speed,
+                floorStart, floorEnd, start_position, speed,
                 customer_size);
 
         customer.setState(CustomerState.GO_TO_BUTTON);

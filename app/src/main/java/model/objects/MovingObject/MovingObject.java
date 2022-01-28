@@ -4,9 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.awt.*;
-import java.awt.geom.Point2D;
 
-public class MovingObject {
+public class MovingObject extends Creature {
     @Getter
     @Setter
     private boolean reachedDestination = true;
@@ -16,17 +15,13 @@ public class MovingObject {
 
     protected final double SPEED;
 
-    protected final Point SIZE;
 
-    @Getter
-    protected Vector2D position;
     protected Vector2D destination;
 
     public MovingObject(Vector2D position, double speed, Point size) {
-        this.position = position;
+        super(position, size);
         this.destination = position;
         this.SPEED = speed;
-        this.SIZE = size;
     }
 
     public void tick(long delta_time) {
@@ -52,7 +47,7 @@ public class MovingObject {
         }
     }
 
-    public void setDestination(Vector2D  destination) {
+    public void setDestination(Vector2D destination) {
         this.destination = destination;
         if (new Vector2D(this.destination).getVectorTo(this.position).getLength() > EPSILON) {
             reachedDestination = false;

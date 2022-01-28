@@ -6,6 +6,6 @@ import java.io.Serializable;
 
 @Data
 public class ProtocolMessage implements Serializable {
-    Protocol protocol = Protocol.OK;
-    Byte data;
+    private final Protocol protocol;
+    private final Serializable data;
 }

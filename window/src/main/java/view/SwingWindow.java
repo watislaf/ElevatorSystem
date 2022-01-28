@@ -1,6 +1,9 @@
 
 package view;
 
+
+import model.ViewModel;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
@@ -9,14 +12,14 @@ public class SwingWindow {
     private ActionListener listener;
     private JButton start_button_;
     private SwingPanel start_panel_;
-    final Point WINDOW_SIZE_ = new Point(400, 400);
+    final Point WINDOW_SIZE_ = new Point(1920, 1080);
 
     private JFrame frame_;
     private Timer main_timer_;
 
 
-    public void startWindow() {
-        initializeWindow();
+    public void startWindow(ViewModel viewModel) {
+        initializeWindow(viewModel);
         initializeButtons();
         initializeTimer(60);
     }
@@ -31,7 +34,7 @@ public class SwingWindow {
         start_button_.setBackground(Color.black);
         start_button_.setFocusPainted(false);
         start_button_.setForeground(Color.black);
-        start_button_.setVisible(true);
+        start_button_.setVisible(false);
         start_panel_.add(start_button_);
     }
 
@@ -40,9 +43,9 @@ public class SwingWindow {
         main_timer_.start();
     }
 
-    private void initializeWindow() {
-        start_panel_ = new SwingPanel();
-        start_panel_.setBackground(Color.WHITE);
+    private void initializeWindow(ViewModel viewModel) {
+        start_panel_ = new SwingPanel(viewModel);
+        start_panel_.setBackground(Color.BLACK);
         start_panel_.setLayout(null);
 
         frame_ = new JFrame("ELEVATOR SYS");

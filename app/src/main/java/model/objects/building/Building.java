@@ -1,12 +1,11 @@
 package model.objects.building;
 
-import controller.ElevatorSystemSettings;
+import controller.elevatorSystemController.ElevatorSystemSettings;
 import lombok.Getter;
 import model.objects.elevator.Elevator;
 import model.objects.MovingObject.Vector2D;
 
 import java.util.Random;
-
 
 
 public class Building {
@@ -18,32 +17,31 @@ public class Building {
     @Getter
     private Elevator[] elevators;
 
-    public Building(ElevatorSystemSettings settings, int FLOORS_COUNT, int ELEVATOR_COUNT) {
-        this.SETTINGS = settings;
+    public Building(ElevatorSystemSettings SETTINGS, int FLOORS_COUNT, int ELEVATOR_COUNT) {
+        this.SETTINGS = SETTINGS;
         this.FLOORS_COUNT = FLOORS_COUNT;
         this.ELEVATOR_COUNT = ELEVATOR_COUNT;
-        this.WALL_SIZE = ((double) settings.BUILDING_SIZE.x) / FLOORS_COUNT;
+        this.WALL_SIZE = ((double) SETTINGS.BUILDING_SIZE.x) / FLOORS_COUNT;
         elevators = new Elevator[ELEVATOR_COUNT];
 
         for (int i = 0; i < ELEVATOR_COUNT; i++) {
             elevators[i] = new Elevator(
                     new Vector2D(
-                            ((double) settings.BUILDING_SIZE.x * (i + 1)) / (ELEVATOR_COUNT + 1), 0),
-                    settings.ELEVATOR_SPEED, settings.ELEVATOR_SIZE,
-                    this.WALL_SIZE, settings.ELEVATOR_MAX_HUMAN_CAPACITY,
-                    settings.BUILDING_SIZE);
+                            ((double) SETTINGS.BUILDING_SIZE.x * (i + 1)) / (ELEVATOR_COUNT + 1), 0),
+                    SETTINGS.ELEVATOR_SPEED, SETTINGS.ELEVATOR_SIZE,
+                    this.WALL_SIZE, SETTINGS.ELEVATOR_MAX_HUMAN_CAPACITY,
+                    SETTINGS.BUILDING_SIZE);
         }
     }
 
     public Vector2D getStartPosition(int floorStart) {
         boolean leftCorner = new Random().nextBoolean();
         if (leftCorner) {
-            return new Vector2D(
-                    -SETTINGS.CUSTOMER_SIZE.x / 2.,
+            return new Vector2D(0,
                     (int) (floorStart * WALL_SIZE));
         } else {
             return new Vector2D(
-                    SETTINGS.BUILDING_SIZE.x + SETTINGS.CUSTOMER_SIZE.x / 2.,
+                    SETTINGS.BUILDING_SIZE.x ,
                     (int) (floorStart * WALL_SIZE));
         }
     }

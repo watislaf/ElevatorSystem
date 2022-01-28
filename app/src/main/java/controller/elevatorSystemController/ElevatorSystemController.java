@@ -1,7 +1,9 @@
-package controller;
+package controller.elevatorSystemController;
 
+import controller.customerController.CustomerSettings;
 import lombok.RequiredArgsConstructor;
 import model.Model;
+import model.objects.building.Building;
 import model.objects.elevator.Elevator;
 import model.objects.elevator.ElevatorRequest;
 
@@ -9,10 +11,19 @@ import java.util.LinkedList;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@RequiredArgsConstructor
+
 public class ElevatorSystemController {
     private final Model MODEL;
+    public final ElevatorSystemSettings SETTINGS = new ElevatorSystemSettings();
+
     LinkedList<ElevatorRequest> pending = new LinkedList<>();
+
+    private final Building DEFAULT_BUILDING = new Building(SETTINGS, 5, 4);
+
+    public ElevatorSystemController(Model model) {
+        this.MODEL = model;
+        model.Initialize(DEFAULT_BUILDING);
+    }
 
 
     public void tick(long delta_time) {

@@ -12,19 +12,16 @@ public class StreamReader extends Thread {
 
     @Override
     public void run() {
-
-        while (true) {
-            try {
+        try {
+            while (true) {
                 ProtocolMessage message = (ProtocolMessage) READER.readObject();
                 CALLABLE.onReceive(message);
                 if (message == null) {
                     break;
                 }
-            } catch (IOException e) {
-                System.out.println(e);
-            } catch (ClassNotFoundException e) {
-                System.out.println(e);
             }
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println(e);
         }
     }
 }

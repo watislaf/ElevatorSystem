@@ -43,7 +43,6 @@ public class Server extends Thread {
                 new StreamReader(new ObjectInputStream(socket.getInputStream()), eventHandler).start();
                 var dataClient = new DataClient(outputStream, socket);
                 connected.add(dataClient);
-                Send(dataClient, new ProtocolMessage());
                 eventHandler.onNewConnection(dataClient);
             }
         } catch (IOException ex) {
