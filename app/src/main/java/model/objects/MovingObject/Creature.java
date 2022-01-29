@@ -9,7 +9,6 @@ import javax.swing.text.Position;
 import java.awt.*;
 import java.io.Serializable;
 
-@NoArgsConstructor
 public class Creature implements Serializable {
     static Integer next_id = 0;
 

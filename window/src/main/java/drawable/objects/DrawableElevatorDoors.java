@@ -36,8 +36,9 @@ public class DrawableElevatorDoors extends Creature implements Drawable {
         }
         Double openedGap = percentage * size.x / 2;
 
-        gameDrawer.fillRect(position, new Point((int) (size.x / 2 - openedGap), size.y));
-        gameDrawer.fillRect(position.add(new Vector2D(size.x / 2. + openedGap, 0)),
+        gameDrawer.fillRect(position.add(new Vector2D(-size.x / 2, 0)),
+                new Point((int) (size.x / 2 - openedGap), size.y));
+        gameDrawer.fillRect(position.add(new Vector2D( openedGap, 0)),
                 new Point((int) (size.x / 2 - openedGap), size.y));
     }
 

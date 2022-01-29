@@ -41,8 +41,10 @@ public class WindowController implements OnSocketEvent {
                 windowMODEL.updateData((ApplicationCreatures) message.getData());
             }
             case ELEVATOR_BUTTON_CLICK -> {
-                windowMODEL.addMovingDrawable(new FlyingText("Click", (Vector2D) message.getData(),
+                windowMODEL.addMovingDrawable(new FlyingText("Click", ((Vector2D) message.getData())
+                        .add(new Vector2D(0, windowMODEL.getSettings().CUSTOMER_SIZE.y)),
                         new Vector2D(0, 100), 15, 30., 1500));
+                windowMODEL.getNearestButton((Vector2D) message.getData()).buttonClick();
             }
             case ELEVATOR_OPEN_CLOSE -> {
                 System.out.println((long) message.getData());
@@ -72,10 +74,11 @@ public class WindowController implements OnSocketEvent {
             long deltaTime = System.currentTimeMillis() - lastTime;
             lastTime += deltaTime;
 
-            windowMODEL.getDrawableOjects().forEach(object -> object.tick(deltaTime));
-            windowMODEL.clearDead();
+            if (windowMODEL.getSettings() != null) {
+                windowMODEL.getDrawableOjects().forEach(object -> object.tick(deltaTime));
+                windowMODEL.clearDead();
 
-
+            }
             gui.repaint();
 
         }

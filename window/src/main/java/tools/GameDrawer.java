@@ -69,7 +69,7 @@ public class GameDrawer {
 
     public void fillRect(Creature creature) {
         GRAPHICS_2D.fillRect(
-                (int) (originalOffset.x + creature.getPosition().x / SCALING_COEFFICIENT),
+                (int) (originalOffset.x + (creature.getPosition().x - creature.getSize().x / 2) / SCALING_COEFFICIENT),
                 (int) (REAL_SIZE.y - originalOffset.y -
                         (creature.getSize().y + creature.getPosition().y) / SCALING_COEFFICIENT),
                 (int) (creature.getSize().x / SCALING_COEFFICIENT),
@@ -82,7 +82,7 @@ public class GameDrawer {
         GRAPHICS_2D.setStroke(new BasicStroke((float) (thickness / SCALING_COEFFICIENT)));
 
         GRAPHICS_2D.drawRect(
-                (int) (originalOffset.x + (position.x) / SCALING_COEFFICIENT),
+                (int) (originalOffset.x + (position.x - size.x / 2) / SCALING_COEFFICIENT),
                 (int) (REAL_SIZE.y - originalOffset.y - (position.y + size.y) / SCALING_COEFFICIENT),
                 (int) (size.x / SCALING_COEFFICIENT),
                 (int) (size.y / SCALING_COEFFICIENT)

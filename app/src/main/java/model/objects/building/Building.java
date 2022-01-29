@@ -21,10 +21,10 @@ public class Building {
         this.WALL_SIZE = ((double) settings.BUILDING_SIZE.y) / settings.FLOORS_COUNT;
         this.ELEVATORS = new LinkedList<>();
 
+        double distanceBetweenElevators = ((double) settings.BUILDING_SIZE.x) / (settings.ELEVATOR_COUNT + 1);
         for (int i = 0; i < settings.ELEVATOR_COUNT; i++) {
             ELEVATORS.add(new Elevator(
-                    new Vector2D(
-                            ((double) settings.BUILDING_SIZE.x * (i + 1)) / (settings.ELEVATOR_COUNT + 1), 0),
+                    new Vector2D(distanceBetweenElevators * (i + 1), 0),
                     settings, this.WALL_SIZE));
         }
     }
