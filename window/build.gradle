@@ -25,3 +25,6 @@ repositories {
 jar {
     manifest.attributes("Main-Class": "mainClassName");
 }
+
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17

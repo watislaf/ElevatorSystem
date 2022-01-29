@@ -1,21 +1,28 @@
 package model.objects.MovingObject;
 
+import java.awt.*;
 import java.awt.geom.Point2D;
+import java.io.Serializable;
 
-public class Vector2D extends Point2D.Double {
+public class Vector2D extends Point2D.Double implements Serializable {
     public Vector2D(double x, double y) {
         super(x, y);
     }
 
-    public Vector2D(Double position) {
+    public Vector2D(Point2D.Double position) {
         super(position.x, position.y);
     }
 
-    public static double distance(Double positionA, Double positionB) {
-        return Math.sqrt((positionA.x - positionB.x) * (positionA.y - positionB.y));
+    public Vector2D(Point position) {
+        super(position.x, position.y);
     }
 
-    public Vector2D getVectorTo(Double destination) {
+    public static double distance(Point2D.Double positionA, Point2D.Double positionB) {
+        return Math.sqrt((positionA.x - positionB.x) * (positionA.x - positionB.x)
+                + (positionA.y - positionB.y) * (positionA.y - positionB.y));
+    }
+
+    public Vector2D getVectorTo(Point2D.Double destination) {
         return new Vector2D(destination.x - x, destination.y - y);
     }
 
@@ -31,7 +38,7 @@ public class Vector2D extends Point2D.Double {
         return new Vector2D(x * length, y * length);
     }
 
-    public Vector2D add(Double second) {
+    public Vector2D add(Point2D.Double second) {
         return new Vector2D(x + second.x, y + second.y);
     }
 
@@ -41,5 +48,11 @@ public class Vector2D extends Point2D.Double {
             return vectorA;
         }
         return vectorB;
+    }
+
+    public Vector2D sub(Vector2D vectorB) {
+        this.x -= vectorB.x;
+        this.y -= vectorB.y;
+        return this;
     }
 }

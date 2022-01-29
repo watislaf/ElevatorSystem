@@ -1,4 +1,6 @@
 package model.objects.elevator;
 
-public record ElevatorRequest(int current_floor, boolean is_go_up) {
+import model.objects.MovingObject.Vector2D;
+
+public record ElevatorRequest(Vector2D button_position, boolean is_go_up) {
 }

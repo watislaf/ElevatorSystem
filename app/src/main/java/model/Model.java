@@ -25,14 +25,14 @@ public class Model {
 
     public ApplicationCreatures getDataToSent() {
         Creature[] customers_ = new Creature[customers.size()];
-        Creature[] elevators_ = new Creature[building.getElevators().length];
+        Creature[] elevators_ = new Creature[building.getELEVATORS().length];
         // slice information
         int i = 0;
         for (var customer_ : customers) {
             customers_[i++] = new Creature(customer_);
         }
         for (i = 0; i < elevators_.length; i++) {
-            elevators_[i] = new Creature(building.getElevators()[i]);
+            elevators_[i] = new Creature(building.getELEVATORS()[i]);
         }
 
         return new ApplicationCreatures(customers_, elevators_);

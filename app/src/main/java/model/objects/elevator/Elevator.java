@@ -1,61 +1,61 @@
 package model.objects.elevator;
 
+import controller.elevatorSystemController.ElevatorSystemSettings;
+import lombok.Getter;
+import lombok.Setter;
 import model.objects.MovingObject.MovingObject;
 import model.objects.MovingObject.Vector2D;
+import model.objects.custumer.Customer;
+import tools.Timer;
 
 import java.awt.*;
 import java.util.*;
 
 public class Elevator extends MovingObject {
-    private final int UNEXIST_FLOOR = 999;
+    public final int UNEXIST_FLOOR = 999;
 
     private final double WALL_SIZE;
     private final Point BUILDING_SIZE;
+    @Getter
+    @Setter
     private ElevatorState state;
-    boolean isGoUp = false;
+    private boolean isGoUp = false;
 
     private final int MAX_HUMAN_CAPACITY;
-    private int current_human_count = 0;
-    private int current_booked_count = 0;
 
-    private TreeMap<Integer, Integer> pickUpTop = new TreeMap<>();
-    private TreeSet<Integer> throwUtTop = new TreeSet<Integer>();
-    private TreeMap<Integer, Integer> pickUpBottom = new TreeMap<>(Comparator.reverseOrder());
-    private TreeSet<Integer> throwOutBottom = new TreeSet<Integer>();
+    private int currentCustomersCount = 0;
+    private int currentBookedCount = 0;
+    // Floor and how many people are waiting
+    private final TreeMap<Integer, Integer> PICK_UP_TOP = new TreeMap<>();
+    private final TreeSet<Integer> THROW_OUT_TOP = new TreeSet<>();
+    private final TreeMap<Integer, Integer> PICK_UP_BOTTOM = new TreeMap<>(Comparator.reverseOrder());
+    private final TreeSet<Integer> THROW_OUT_BOTTOM = new TreeSet<>();
+
+    private final LinkedList<Customer> CUSTOMERS_INSIDE = new LinkedList<>();
 
     @Override
     public void tick(long deltaTime) {
-        switch (state) {
-            case WAIT -> {
-                int best_floor = findBestFloor(deltaTime);
-                if (best_floor != UNEXIST_FLOOR) {
-                    setDestination(new Vector2D(position.x,
-                            best_floor * WALL_SIZE));
-                    state = ElevatorState.IN_MOTION;
-                }
-            }
-        }
         super.tick(deltaTime);
     }
 
-    private int findBestFloor(long deltaTime) {
-        Map<Integer, Integer> map_to_work_with;
-        Integer floorToGetUp = UNEXIST_FLOOR;
-        if (!pickUpTop.isEmpty()) {
-            floorToGetUp = Math.min(pickUpTop.firstKey(), floorToGetUp);
+
+    public int findBestFloor() {
+        int floorToGetUp = UNEXIST_FLOOR;
+        if (!PICK_UP_TOP.isEmpty()) {
+            floorToGetUp = Math.min(PICK_UP_TOP.firstKey(), floorToGetUp);
         }
-        if (!throwUtTop.isEmpty()) {
-            floorToGetUp = Math.min(throwUtTop.first(), floorToGetUp);
+        if (!THROW_OUT_TOP.isEmpty()) {
+            floorToGetUp = Math.min(THROW_OUT_TOP.first(), floorToGetUp);
         }
         if (isGoUp && floorToGetUp != UNEXIST_FLOOR) {
             return floorToGetUp;
         }
-        Integer floorToGetDown = -UNEXIST_FLOOR;
-        if (!pickUpBottom.isEmpty()) {
-            floorToGetDown = Math.max(pickUpBottom.firstKey(), floorToGetDown);
+        int floorToGetDown = -UNEXIST_FLOOR;
+        if (!PICK_UP_BOTTOM.isEmpty()) {
+            floorToGetDown = Math.max(PICK_UP_BOTTOM.firstKey(), floorToGetDown);
         }
-        if (!throwOutBottom.isEmpty()) {
-            floorToGetDown = Math.max(throwOutBottom.first(), floorToGetDown);
+        if (!THROW_OUT_BOTTOM.isEmpty()) {
+            floorToGetDown = Math.max(THROW_OUT_BOTTOM.first(), floorToGetDown);
         }
         if (!isGoUp && floorToGetDown != -UNEXIST_FLOOR) {
             return floorToGetDown;
@@ -72,22 +72,17 @@ public class Elevator extends MovingObject {
     }
 
     public boolean isAvailable() {
-        return current_booked_count + current_human_count <= this.MAX_HUMAN_CAPACITY;
+        return currentBookedCount + currentCustomersCount <= this.MAX_HUMAN_CAPACITY;
     }
 
-    public Elevator() {
-        this(new Vector2D(0, -999), 0, new Point(0, 0),
-                0, 0, new Point(0, 0));
-    }
 
-    public Elevator(Vector2D position, double speed, Point size,
-                    double wall_size, int MAX_HUMAN_CAPACITY,
-                    Point BUILDING_SIZE) {
-        super(position, speed, size);
-        this.WALL_SIZE = wall_size;
+    public Elevator(Vector2D position, ElevatorSystemSettings settings,
+                    double wall_size) {
+        super(position, settings.ELEVATOR_SPEED, settings.ELEVATOR_SIZE);
+        this.MAX_HUMAN_CAPACITY = settings.ELEVATOR_MAX_HUMAN_CAPACITY;
+        this.BUILDING_SIZE = settings.BUILDING_SIZE;
         this.state = ElevatorState.WAIT;
-        this.MAX_HUMAN_CAPACITY = MAX_HUMAN_CAPACITY;
-        this.BUILDING_SIZE = BUILDING_SIZE;
+        this.WALL_SIZE = wall_size;
     }
 
     public int getCurrentFloor() {
@@ -99,17 +94,45 @@ public class Elevator extends MovingObject {
     }
 
     public void addFloorToPickUp(int toAddFloor) {
-        current_booked_count++;
-        Map<Integer, Integer> map_to_work_with;
-        if (state == ElevatorState.WAIT || toAddFloor > getCurrentFloor()) {
-            map_to_work_with = pickUpTop;
+        currentBookedCount++;
+        Map<Integer, Integer> mapToWorkWith;
+        if (toAddFloor > getCurrentFloor()) {
+            mapToWorkWith = PICK_UP_TOP;
         } else {
-            map_to_work_with = pickUpBottom;
+            mapToWorkWith = PICK_UP_BOTTOM;
         }
-        if (map_to_work_with.containsKey(toAddFloor)) {
-            map_to_work_with.put(toAddFloor, map_to_work_with.get(toAddFloor) + 1);
+        if (mapToWorkWith.containsKey(toAddFloor)) {
+            mapToWorkWith.put(toAddFloor, mapToWorkWith.get(toAddFloor) + 1);
         } else {
-            map_to_work_with.put(toAddFloor, 0);
+            mapToWorkWith.put(toAddFloor, 1);
         }
+    }
+
+    public void put() {
+        currentCustomersCount++;
+
+    }
+
+    public void remove() {
+        currentCustomersCount--;
+    }
+
+    public void setFloorDestination(int bestFloor) {
+        setDestination(new Vector2D(position.x, bestFloor * WALL_SIZE));
+    }
+
+    public void arrived() {
+        Map<Integer, Integer> mapToWorkWith;
+        if (isGoUp) {
+            mapToWorkWith = PICK_UP_TOP;
+        } else {
+            mapToWorkWith = PICK_UP_BOTTOM;
+        }
+        currentBookedCount -= mapToWorkWith.get(getCurrentFloor());
+        mapToWorkWith.remove(getCurrentFloor());
+    }
+
+    public boolean isInMotion() {
+        return state.equals(ElevatorState.IN_MOTION);
     }
 }

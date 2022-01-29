@@ -1,90 +1,149 @@
 package controller.customerController;
 
+import controller.Controller;
 import controller.elevatorSystemController.ElevatorSystemController;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import model.Model;
+import model.objects.elevator.ElevatorRequest;
 import model.objects.MovingObject.Vector2D;
 import model.objects.custumer.Customer;
 import model.objects.custumer.CustomerState;
-import model.objects.elevator.ElevatorRequest;
 
 import java.awt.*;
+import java.awt.geom.Point2D;
 import java.util.Random;
 
-@RequiredArgsConstructor
 public class CustomersController {
-    private final Model MODEL;
+
 
     @Getter
     public final CustomerSettings SETTINGS = new CustomerSettings();
     private final ElevatorSystemController elevatorSystemController;
+    private final Controller CONTROLLER;
+
+    public CustomersController(Controller CONTROLLER) {
+        this.elevatorSystemController = CONTROLLER.ELEVATOR_SYSTEM_CONTROLLER;
+        this.CONTROLLER = CONTROLLER;
+    }
 
     public void tick(long deltaTime) {
-        if (MODEL.getCustomers().isEmpty()) {
-            CreateCustomer(0, 4, SETTINGS.CUSTOMER_SIZE,
+        if (CONTROLLER.MODEL.getCustomers().isEmpty()) {
+            CreateCustomer(1, 4, SETTINGS.CUSTOMER_SIZE,
                     new Random()
-                            .doubles(5., 10.)
+                            .doubles(
+                                    SETTINGS.CUSTOMER_SPEED
+                                            - SETTINGS.CUSTOMER_SPEED / 4,
+                                    SETTINGS.CUSTOMER_SPEED
+                                            + SETTINGS.CUSTOMER_SPEED / 4)
                             .findAny()
                             .getAsDouble());
         }
 
-        for (var customer : MODEL.getCustomers()) {
+        for (var customer : CONTROLLER.MODEL.getCustomers()) {
             switch (customer.getState()) {
-                case GO_TO_BUTTON -> {
-                    processGotOButton(customer);
-                }
-                case WAIT_UNTIL_ARRIVED -> {
-                    processWaitUntillArrived(customer);
-                }
-                case GET_IN -> {
-
-                }
-                case STAY_IN -> {
-
-                }
-                case GET_OUT -> {
-
-                }
+                case GO_TO_BUTTON -> processGotOButton(customer);
+                case WAIT_UNTIL_ARRIVED -> processWaitUntillArrived(customer);
+                case GET_IN -> processGetIn(customer);
+                case STAY_IN -> processStayIn(customer);
+                case GET_OUT -> processGetOut(customer);
             }
             customer.tick(deltaTime);
         }
     }
 
-    private void processWaitUntillArrived(Customer customer) {
+    private void processGetOut(Customer customer) {
+        if (!customer.isReachedDestination()) {
+            return;
+        }
+        if (customer.getPosition().x < 0 ||
+                customer.getPosition().x > elevatorSystemController.SETTINGS.BUILDING_SIZE.x) {
+            customer.setDead(true);
+        } else {
+            customer.setDestination(getStartPositionFOrmCustomer(customer.getCurrentFlor()));
+        }
+    }
 
-        var elevatorPosition = MODEL.getBuilding()
+    private void processStayIn(Customer customer) {
+        if (customer.getCurrentElevator().isInMotion()) {
+            customer.setVisible(false);
+        } else {
+            if (!customer.isVisible()) {
+                customer.teleportToElevator();
+            }
+            customer.setVisible(true);
+            customer.setCurrentFlor(customer.getCurrentElevator().getCurrentFloor());
+        }
+        if (customer.getCurrentElevator().isOpened()) {
+            if(customer.getCurrentFlor() == customer.getFloorEnd()) {
+                customer.setState(CustomerState.GET_OUT);
+                elevatorSystemController.getOutFromElevator(customer.getCurrentElevator());
+                customer.setDestination(customer.getCurrentElevator().getPosition());
+                customer.setCurrentElevator(null);
+            }
+        }
+    }
+
+    private void processGetIn(Customer customer) {
+        var nearestOpenedElevator = CONTROLLER.MODEL.getBuilding()
                 .getNearestOpenedElevatorOnFloor(customer.getPosition(), customer.getCurrentFlor());
-        if (elevatorPosition != null) {
-            customer.setDestination(elevatorPosition);
+        if (nearestOpenedElevator == null) {
+            customer.setState(CustomerState.GO_TO_BUTTON);
+            return;
+        }
+        if (customer.isReachedDestination()) {
+            elevatorSystemController.getIntoElevator(nearestOpenedElevator);
+            customer.setCurrentElevator(nearestOpenedElevator);
+            customer.setDestination(
+                    customer.getPosition().add(
+                            new Vector2D(new Random()
+                                    .doubles(-customer.getSize().x / 2.,
+                                            customer.getSize().x / 2.)
+                                    .findAny().getAsDouble()
+                                    , 0)));
+            customer.setState(CustomerState.STAY_IN);
+        }
+    }
+
+    private void processWaitUntillArrived(Customer customer) {
+        var nearestOpenedElevatorOnFloor = CONTROLLER.MODEL.getBuilding()
+                .getNearestOpenedElevatorOnFloor(customer.getPosition(), customer.getCurrentFlor());
+        if (nearestOpenedElevatorOnFloor != null) {
+            customer.setDestination(nearestOpenedElevatorOnFloor.getPosition());
         }
     }
 
     private void processGotOButton(Customer customer) {
-        if (!customer.isReachedDestination()) {
-            var buttonPosition = MODEL.getBuilding()
-                    .getNearestButtonOnFloor(customer.getPosition(), customer.getCurrentFlor());
-            customer.setDestination(buttonPosition);
-        } else {
+        var buttonPosition = CONTROLLER.MODEL.getBuilding()
+                .getNearestButtonOnFloor(customer.getPosition(), customer.getCurrentFlor());
+        if (buttonPosition == null) {
+//            customer.setState(CustomerState.); // TODO add walking mehanick
+        }
+        customer.setDestination(buttonPosition);
+        if (customer.isReachedDestination()) {
             elevatorSystemController.buttonClick(
-                    new ElevatorRequest(customer.getCurrentFlor(), customer.wantsGoUp()));
+                    new ElevatorRequest(customer.getPosition(), customer.wantsGoUp()));
             customer.setState(CustomerState.WAIT_UNTIL_ARRIVED);
         }
     }
 
     private void CreateCustomer(int floorStart, int floorEnd, Point customer_size, double speed) {
-        Vector2D start_position = MODEL.getBuilding().getStartPosition(floorStart);
+        var startPosition = getStartPositionFOrmCustomer(floorStart);
+        var customer = new Customer(
+                floorStart, floorEnd, startPosition, speed,
+                customer_size);
+
+        customer.setState(CustomerState.GO_TO_BUTTON);
+
+        CONTROLLER.MODEL.getCustomers().add(customer);
+    }
+
+    private Vector2D getStartPositionFOrmCustomer(int floorStart) {
+        Vector2D start_position = CONTROLLER.MODEL.getBuilding().getStartPositionAfterBuilding(floorStart);
         // So u can't see customer whet it spawns
         if (start_position.x == 0) {
             start_position.x -= SETTINGS.CUSTOMER_SIZE.x / 2.;
         } else {
             start_position.x += SETTINGS.CUSTOMER_SIZE.x / 2.;
         }
-        var customer = new Customer(
-                floorStart, floorEnd, start_position, speed,
-                customer_size);
-
-        customer.setState(CustomerState.GO_TO_BUTTON);
-        MODEL.getCustomers().add(customer);
+        return start_position;
     }
 }

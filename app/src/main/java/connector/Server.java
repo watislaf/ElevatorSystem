@@ -40,7 +40,7 @@ public class Server extends Thread {
             while (true) {
                 Socket socket = serverSocket.accept();
                 ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
-                new StreamReader(new ObjectInputStream(socket.getInputStream()), eventHandler).start();
+                new StreamReader(socket, new ObjectInputStream(socket.getInputStream()), eventHandler).start();
                 var dataClient = new DataClient(outputStream, socket);
                 connected.add(dataClient);
                 eventHandler.onNewConnection(dataClient);

@@ -1,21 +1,22 @@
 package tools;
 
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
+@NoArgsConstructor
 public class Timer {
-    private final long TIME_TO_COUNT;
     private long current_time;
 
     public void tick(long deltaTime) {
         current_time -= deltaTime;
     }
 
+
     public boolean isReady() {
         return current_time <= 0;
     }
 
-    public void restart() {
-        current_time = TIME_TO_COUNT;
+    public void restart(long timeToCount) {
+        current_time = timeToCount;
     }
 }

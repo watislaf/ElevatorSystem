@@ -12,7 +12,7 @@ public class SwingWindow {
     private ActionListener listener;
     private JButton start_button_;
     private SwingPanel start_panel_;
-    final Point WINDOW_SIZE_ = new Point(1920, 1080);
+    final Point WINDOW_SIZE_ = new Point(800, 800);
 
     private JFrame frame_;
     private Timer main_timer_;

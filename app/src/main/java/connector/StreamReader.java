@@ -4,9 +4,11 @@ import connector.protocol.ProtocolMessage;
 import lombok.*;
 
 import java.io.*;
+import java.net.Socket;
 
 @AllArgsConstructor
 public class StreamReader extends Thread {
+    private final Socket SOCKET;
     private final ObjectInputStream READER;
     private final OnSocketEvent CALLABLE;
 
@@ -21,7 +23,12 @@ public class StreamReader extends Thread {
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
-            System.out.println(e);
+            try {
+                SOCKET.close();
+            } catch (IOException ex) {
+                System.out.println("CAN'T CLOSE The socket");
+            }
+///            System.out.println("DISCONECT");
         }
     }
 }

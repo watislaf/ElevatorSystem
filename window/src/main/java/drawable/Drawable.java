@@ -1,7 +1,10 @@
 package drawable;
 
+import tools.GameDrawer;
+
 import java.awt.*;
 
 public interface Drawable {
-    void Draw(Graphics g);
+    void draw(GameDrawer gameDrawer);
+    void tick(long deltaTime);
 }

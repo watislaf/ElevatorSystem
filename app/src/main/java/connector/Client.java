@@ -4,18 +4,17 @@ import connector.protocol.ProtocolMessage;
 
 import java.io.*;
 import java.net.Socket;
-import java.rmi.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 
 public class Client {
     private ObjectOutputStream outputStream;
     private Socket socket;
 
-    public boolean isConnected() {
+    public boolean isClosed() {
         if (socket == null) {
-            return false;
+            return true;
         }
-        return socket.isConnected();
+        return socket.isClosed() || !socket.isConnected();
     }
 
     public void send(ProtocolMessage message) {
@@ -34,7 +33,7 @@ public class Client {
                 var inputStream = new ObjectInputStream(socket.getInputStream());
 
                 receivable.onNewConnection(new DataClient(outputStream, socket));
-                new StreamReader(inputStream, receivable).start();
+                new StreamReader(socket,inputStream, receivable).start();
                 return;
             } catch (IOException e) {
                 System.out.println(e);
