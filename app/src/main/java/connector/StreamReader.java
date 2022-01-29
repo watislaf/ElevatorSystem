@@ -9,14 +9,14 @@ import java.net.Socket;
 @AllArgsConstructor
 public class StreamReader extends Thread {
     private final Socket SOCKET;
-    private final ObjectInputStream READER;
+    private final InputStream READER;
     private final OnSocketEvent CALLABLE;
 
     @Override
     public void run() {
         try {
             while (true) {
-                ProtocolMessage message = (ProtocolMessage) READER.readObject();
+                ProtocolMessage message = (ProtocolMessage) new ObjectInputStream(READER).readObject();
                 CALLABLE.onReceive(message);
                 if (message == null) {
                     break;
@@ -25,6 +25,7 @@ public class StreamReader extends Thread {
         } catch (IOException | ClassNotFoundException e) {
             try {
                 SOCKET.close();
+                System.out.println("DISCONECTED");
             } catch (IOException ex) {
                 System.out.println("CAN'T CLOSE The socket");
             }

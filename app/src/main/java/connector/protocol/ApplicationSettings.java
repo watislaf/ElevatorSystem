@@ -2,22 +2,30 @@ package connector.protocol;
 
 import controller.customerController.CustomerSettings;
 import controller.elevatorSystemController.ElevatorSystemSettings;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.awt.*;
 import java.io.Serializable;
 
+@NoArgsConstructor
+@Getter
+@Setter
 public class ApplicationSettings implements Serializable {
-    public final Point BUILDING_SIZE;
-    public final Point ELEVATOR_SIZE;
-    public final int FLOORS_COUNT;
-    public final double BUTTON_RELATIVE_POSITION;
-    public final Point CUSTOMER_SIZE;
+    public Point buildingSize;
+    public Point elevatorSize;
+    public int floorsCount;
+    public double buttonRelativePosition;
+    public Point customerSize;
+    public long elevatorOpenCloseTime;
 
     public ApplicationSettings(ElevatorSystemSettings settingsElevator, CustomerSettings settingsCustomer) {
-        BUILDING_SIZE = settingsElevator.BUILDING_SIZE;
-        ELEVATOR_SIZE = settingsElevator.ELEVATOR_SIZE;
-        BUTTON_RELATIVE_POSITION = settingsElevator.BUTTON_RELATIVE_POSITION;
-        CUSTOMER_SIZE = settingsCustomer.CUSTOMER_SIZE;
-        FLOORS_COUNT = settingsElevator.FLOORS_COUNT;
+        buildingSize = settingsElevator.BUILDING_SIZE;
+        elevatorSize = settingsElevator.ELEVATOR_SIZE;
+        buttonRelativePosition = settingsElevator.BUTTON_RELATIVE_POSITION;
+        customerSize = settingsCustomer.CUSTOMER_SIZE;
+        floorsCount = settingsElevator.FLOORS_COUNT;
+        elevatorOpenCloseTime = settingsElevator.ELEVATOR_OPEN_CLOSE_TIME;
     }
 }

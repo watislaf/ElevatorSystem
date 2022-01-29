@@ -15,11 +15,13 @@ public class Server extends Thread {
     public Server(OnSocketEvent eventHandler) {
         this.eventHandler = eventHandler;
         connected = new LinkedList<DataClient>();
-        this.start();
     }
 
     public void Send(ProtocolMessage message) {
         connected.removeIf(DataClient::isClosed);
+        if (connected == null) {
+            return;
+        }
         for (DataClient client : connected) {
             Send(client, message);
         }
@@ -27,9 +29,10 @@ public class Server extends Thread {
 
     public void Send(DataClient client, ProtocolMessage message) {
         try {
-            client.STREAM.writeObject(message);
+            new ObjectOutputStream(client.STREAM).writeObject(message);
         } catch (IOException e) {
             System.out.println(e.toString());
+            System.out.println("XD");
         }
     }
 
@@ -39,9 +42,8 @@ public class Server extends Thread {
             System.out.println("Server is listening on port " + ConnectionSettings.PORT);
             while (true) {
                 Socket socket = serverSocket.accept();
-                ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
-                new StreamReader(socket, new ObjectInputStream(socket.getInputStream()), eventHandler).start();
-                var dataClient = new DataClient(outputStream, socket);
+                var dataClient = new DataClient(socket.getOutputStream(), socket);
+                new StreamReader(socket, socket.getInputStream(), eventHandler).start();
                 connected.add(dataClient);
                 eventHandler.onNewConnection(dataClient);
             }

@@ -2,14 +2,16 @@ package model.objects.MovingObject;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.swing.text.Position;
 import java.awt.*;
 import java.io.Serializable;
 
+@NoArgsConstructor
 public class Creature implements Serializable {
-    static Integer next_id = 4;
-
+    static Integer next_id = 0;
 
     @Getter
     long id;
@@ -21,12 +23,14 @@ public class Creature implements Serializable {
     boolean isVisible = true;
 
     @Getter
-    protected Point size = new Point(0, 0);
+    protected Point size = new Point();
+
 
     public Creature(Creature creatureA) {
         this.id = creatureA.id;
-        this.position = creatureA.position;
-        this.size = creatureA.size;
+        this.position = new Vector2D(creatureA.position);
+        this.size = new Point(creatureA.size);
+        this.isVisible = creatureA.isVisible;
     }
 
     public Creature(Vector2D position) {
@@ -44,4 +48,5 @@ public class Creature implements Serializable {
         this.position = creature.position;
         this.size = creature.size;
     }
+
 }

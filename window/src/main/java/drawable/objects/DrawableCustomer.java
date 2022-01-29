@@ -3,8 +3,6 @@ package drawable.objects;
 import drawable.Drawable;
 
 import model.objects.MovingObject.Creature;
-import model.objects.MovingObject.Vector2D;
-import model.objects.custumer.Customer;
 import tools.GameDrawer;
 
 import java.awt.*;
@@ -16,8 +14,8 @@ public class DrawableCustomer extends Creature implements Drawable {
 
     @Override
     public void draw(GameDrawer gameDrawer) {
-        gameDrawer.setColor(Color.white);
-        gameDrawer.drawRect(this);
+        gameDrawer.setColor(Color.pink);
+        gameDrawer.fillRect(this);
     }
 
     @Override

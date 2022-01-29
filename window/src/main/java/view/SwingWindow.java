@@ -2,7 +2,7 @@
 package view;
 
 
-import model.ViewModel;
+import model.WindowModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,8 +18,8 @@ public class SwingWindow {
     private Timer main_timer_;
 
 
-    public void startWindow(ViewModel viewModel) {
-        initializeWindow(viewModel);
+    public void startWindow(WindowModel windowModel) {
+        initializeWindow(windowModel);
         initializeButtons();
         initializeTimer(60);
     }
@@ -43,8 +43,8 @@ public class SwingWindow {
         main_timer_.start();
     }
 
-    private void initializeWindow(ViewModel viewModel) {
-        start_panel_ = new SwingPanel(viewModel);
+    private void initializeWindow(WindowModel windowModel) {
+        start_panel_ = new SwingPanel(windowModel);
         start_panel_.setBackground(Color.BLACK);
         start_panel_.setLayout(null);
 

@@ -14,7 +14,7 @@ public class Client {
         if (socket == null) {
             return true;
         }
-        return socket.isClosed() || !socket.isConnected();
+        return !socket.isConnected()||socket.isClosed()||socket.isOutputShutdown();
     }
 
     public void send(ProtocolMessage message) {
@@ -26,14 +26,16 @@ public class Client {
     }
 
     public void connect(String hostname, OnSocketEvent receivable) {
+        if (!isClosed()) {
+            return;
+        }
         while (true) {
             try {
                 socket = new Socket(hostname, ConnectionSettings.PORT);
                 outputStream = new ObjectOutputStream(socket.getOutputStream());
-                var inputStream = new ObjectInputStream(socket.getInputStream());
 
                 receivable.onNewConnection(new DataClient(outputStream, socket));
-                new StreamReader(socket,inputStream, receivable).start();
+                new StreamReader(socket, socket.getInputStream(), receivable).start();
                 return;
             } catch (IOException e) {
                 System.out.println(e);

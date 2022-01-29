@@ -1,13 +1,12 @@
 package controller;
 
 import connector.Client;
-import connector.ConnectionSettings;
-import model.ViewModel;
+import model.WindowModel;
 
 public class Main {
     public static void main(String[] args) {
-        ViewModel viewModel = new ViewModel();
-        Controller controller = new Controller(viewModel);
+        WindowModel windowModel = new WindowModel();
+        WindowController controller = new WindowController(windowModel);
         var client = new Client();
         controller.setClient(client);
 

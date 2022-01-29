@@ -9,6 +9,6 @@ import java.io.Serializable;
 
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 public class CustomerSettings implements Serializable {
-    public final double CUSTOMER_SPEED = 20;
+    public final double CUSTOMER_SPEED = 40;
     public final Point CUSTOMER_SIZE = new Point(30, 60);
 }

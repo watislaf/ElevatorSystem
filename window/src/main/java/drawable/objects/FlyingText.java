@@ -8,7 +8,7 @@ import tools.Timer;
 
 import java.awt.*;
 
-public class FlyingText extends MovingObject implements Drawable {
+public class FlyingText extends MovingObject implements Drawable  {
     private final int FONT_SIZE;
     private final String TEXT;
     private final Timer TIMER;

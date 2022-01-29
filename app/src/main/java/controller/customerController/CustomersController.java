@@ -73,7 +73,7 @@ public class CustomersController {
             customer.setCurrentFlor(customer.getCurrentElevator().getCurrentFloor());
         }
         if (customer.getCurrentElevator().isOpened()) {
-            if(customer.getCurrentFlor() == customer.getFloorEnd()) {
+            if (customer.getCurrentFlor() == customer.getFloorEnd()) {
                 customer.setState(CustomerState.GET_OUT);
                 elevatorSystemController.getOutFromElevator(customer.getCurrentElevator());
                 customer.setDestination(customer.getCurrentElevator().getPosition());
@@ -100,6 +100,7 @@ public class CustomersController {
                                     .findAny().getAsDouble()
                                     , 0)));
             customer.setState(CustomerState.STAY_IN);
+            elevatorSystemController.setFloorToReach(customer.getCurrentElevator(), customer.getFloorEnd());
         }
     }
 
@@ -108,6 +109,7 @@ public class CustomersController {
                 .getNearestOpenedElevatorOnFloor(customer.getPosition(), customer.getCurrentFlor());
         if (nearestOpenedElevatorOnFloor != null) {
             customer.setDestination(nearestOpenedElevatorOnFloor.getPosition());
+            customer.setState(CustomerState.GET_IN);
         }
     }
 

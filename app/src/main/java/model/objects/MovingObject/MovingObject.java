@@ -48,6 +48,7 @@ public class MovingObject extends Creature {
         } else {
             position = new Vector2D(position).add(moveDirection);
         }
+
     }
 
     public boolean isReachedDestination() {

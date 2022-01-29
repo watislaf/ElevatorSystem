@@ -86,7 +86,7 @@ public class Elevator extends MovingObject {
     }
 
     public int getCurrentFloor() {
-        return (int) Math.floor(position.x / (BUILDING_SIZE.y / WALL_SIZE));
+        return (int) Math.round(position.y / WALL_SIZE);
     }
 
     public boolean isOpened() {
@@ -110,7 +110,6 @@ public class Elevator extends MovingObject {
 
     public void put() {
         currentCustomersCount++;
-
     }
 
     public void remove() {
@@ -128,11 +127,34 @@ public class Elevator extends MovingObject {
         } else {
             mapToWorkWith = PICK_UP_BOTTOM;
         }
-        currentBookedCount -= mapToWorkWith.get(getCurrentFloor());
-        mapToWorkWith.remove(getCurrentFloor());
+        int currentFloor = getCurrentFloor();
+        if (mapToWorkWith.containsKey(currentFloor)) {
+            currentBookedCount -= mapToWorkWith.get(currentFloor);
+            mapToWorkWith.remove(getCurrentFloor());
+        }
+
+
+        SortedSet<Integer> setToWorkWith;
+        if (isGoUp) {
+            setToWorkWith = THROW_OUT_TOP;
+        } else {
+            setToWorkWith = THROW_OUT_BOTTOM;
+        }
+        setToWorkWith.remove(currentFloor);
+
     }
 
     public boolean isInMotion() {
         return state.equals(ElevatorState.IN_MOTION);
+    }
+
+    public void addFloorToThrowOut(int floorEnd) {
+        SortedSet<Integer> setToWorkWith;
+        if (floorEnd > getCurrentFloor()) {
+            setToWorkWith = THROW_OUT_TOP;
+        } else {
+            setToWorkWith = THROW_OUT_BOTTOM;
+        }
+        setToWorkWith.add(floorEnd);
     }
 }

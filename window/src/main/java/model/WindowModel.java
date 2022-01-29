@@ -5,15 +5,16 @@ import connector.protocol.ApplicationSettings;
 import drawable.Drawable;
 import drawable.objects.DrawableCustomer;
 import drawable.objects.DrawableElevator;
+import drawable.objects.DrawableElevatorDoors;
 import drawable.objects.FlyingText;
 import lombok.Getter;
 import lombok.Setter;
 import model.objects.MovingObject.Creature;
 import model.objects.MovingObject.MovingObject;
-import model.objects.custumer.Customer;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.function.Supplier;
 
 
 public class WindowModel {
@@ -28,40 +29,36 @@ public class WindowModel {
     LinkedList<FlyingText> flyingTexts = new LinkedList<>();
 
     public void updateData(ApplicationCreatures data) {
-        LinkedList<Customer> elevatorCreatures =        LinkedList<Customer> ( elevators);
-        LinkedList<Customer>  customerCreatures =           LinkedList<Customer>(customers);
-        this.apply(data.getElevators(), elevatorCreatures);
 
+        this.apply(data.getElevators(), elevators);
+        this.apply(data.getCustomers(), customers);
 
-        elevators = new LinkedList<>();
-        elevatorCreatures.forEach(elevator -> {
-            try {
-                elevators.add((DrawableElevator) elevator);
-                System.out.println("Added old");
-            } catch (java.lang.ClassCastException e) {
-                elevators.add(new DrawableElevator(elevator));
-            }
-            elevators.getLast().getDoors().setOpenCloseDoorsTime(settings.getElevatorOpenCloseTime());
-        });
+        // Add
+        data.getElevators().forEach(
+                creatureA -> {
+                    if (elevators.stream()
+                            .noneMatch(creatureB -> creatureA.getId() == creatureB.getId())
+                    ) {
+                        elevators.add(new DrawableElevator(creatureA,settings.getElevatorOpenCloseTime()));
+                    }
+                }
+        );
 
-
-        this.apply(data.getCustomers(), customerCreatures);
-        customers = new LinkedList<>();
-        customerCreatures.forEach(customer -> {
-            try {
-                customers.add((DrawableCustomer) customer);
-            } catch (java.lang.ClassCastException e) {
-                customers.add(new DrawableCustomer(customer));
-            }
-            ;
-        });
-
+        data.getCustomers().forEach(
+                creatureA -> {
+                    if (customers.stream()
+                            .noneMatch(creatureB -> creatureA.getId() == creatureB.getId())
+                    ) {
+                        customers.add(new DrawableCustomer(creatureA));
+                    }
+                }
+        );
     }
 
-    private void apply(LinkedList<Creature> creatures_came, LinkedList<Creature> creatures_to_apply) {
+    private <T extends Creature> void apply(LinkedList<Creature> creatures_came, LinkedList<T> creatures_to_apply) {
         // erease
         creatures_to_apply.removeIf(
-                creatureA -> creatures_came.stream().anyMatch(
+                creatureA -> creatures_came.stream().noneMatch(
                         creatureB -> creatureA.getId() == creatureB.getId()));
         // update
         creatures_to_apply.forEach(
@@ -71,23 +68,9 @@ public class WindowModel {
                     ).findFirst().get());
                 }
         );
-        // Add
-        creatures_came.forEach(
-                creatureA -> {
-                    if (creatures_to_apply.stream()
-                            .noneMatch(
-                                    creatureB -> creatureA.getId() == creatureB.getId())
-                    ) {
-                        creatures_to_apply.add(new Creature(creatureA));
-                    }
-                }
-        );
     }
 
     public LinkedList<Drawable> getDrawableOjects() {
-        if (elevators.size() != 0) {
-//            System.out.println(elevators.get(0));
-        }
         LinkedList<Drawable> drawables = new LinkedList<>();
         drawables.addAll(elevators);
         drawables.addAll(customers);
@@ -99,7 +82,7 @@ public class WindowModel {
 
     private Collection<Drawable> getElevatorDoors() {
         LinkedList<Drawable> elevatorDoors = new LinkedList<>();
-        elevators.forEach(elevator -> elevatorDoors.add(elevator.getDoors()));
+       elevators.forEach(elevator -> elevatorDoors.add(elevator.getDoors()));
         return elevatorDoors;
     }
 

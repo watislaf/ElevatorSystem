@@ -6,25 +6,26 @@ import model.objects.elevator.Elevator;
 import model.objects.MovingObject.Vector2D;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.Random;
 
 
 public class Building {
     public final ElevatorSystemSettings SETTINGS;
     public final double WALL_SIZE;
-    @Getter
-    private final Elevator[] ELEVATORS;
+
+    public final LinkedList<Elevator> ELEVATORS;
 
     public Building(ElevatorSystemSettings settings) {
         this.SETTINGS = settings;
         this.WALL_SIZE = ((double) settings.BUILDING_SIZE.y) / settings.FLOORS_COUNT;
-        this.ELEVATORS = new Elevator[settings.ELEVATOR_COUNT];
+        this.ELEVATORS = new LinkedList<>();
 
         for (int i = 0; i < settings.ELEVATOR_COUNT; i++) {
-            ELEVATORS[i] = new Elevator(
+            ELEVATORS.add(new Elevator(
                     new Vector2D(
                             ((double) settings.BUILDING_SIZE.x * (i + 1)) / (settings.ELEVATOR_COUNT + 1), 0),
-                    settings, this.WALL_SIZE);
+                    settings, this.WALL_SIZE));
         }
     }
 
@@ -41,7 +42,7 @@ public class Building {
     }
 
     public Vector2D getNearestButtonOnFloor(Vector2D position, int floorStart) {
-        if (ELEVATORS.length == 0) {
+        if (ELEVATORS.size() == 0) {
             return null;
         }
         var nearestButton = new Vector2D(SETTINGS.BUILDING_SIZE.x * 2, position.y);
@@ -57,10 +58,10 @@ public class Building {
         if (!isOpenedElevatorOnFloorExist(floor)) {
             return null;
         }
-        if (ELEVATORS.length == 0) {
+        if (ELEVATORS.size() == 0) {
             return null;
         }
-        Elevator nearestElevator = ELEVATORS[0];
+        Elevator nearestElevator = ELEVATORS.get(0);
         for (var elevator : ELEVATORS) {
             if (elevator.getCurrentFloor() == floor && elevator.isOpened()) {
                 var nearestElevatorPosition = position.getNearest(elevator.getPosition(),
@@ -74,7 +75,7 @@ public class Building {
     }
 
     private boolean isOpenedElevatorOnFloorExist(int floor) {
-        return Arrays.stream(ELEVATORS).anyMatch(elevator -> elevator.getCurrentFloor() == floor && elevator.isOpened());
+        return ELEVATORS.stream().anyMatch(elevator -> elevator.getCurrentFloor() == floor && elevator.isOpened());
     }
 
 }

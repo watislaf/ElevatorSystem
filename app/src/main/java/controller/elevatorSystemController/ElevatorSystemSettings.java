@@ -9,7 +9,7 @@ import java.io.Serializable;
 
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 public class ElevatorSystemSettings implements Serializable {
-    public final double ELEVATOR_SPEED = 30;
+    public final double ELEVATOR_SPEED = 50;
     public final long ELEVATOR_AFTER_CLOSE_AFK_TIME = 1000;
     public final long ELEVATOR_WAIT_AS_OPENED_TIME = 3000;
     public final long ELEVATOR_OPEN_CLOSE_TIME = 1500;

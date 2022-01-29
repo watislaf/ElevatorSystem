@@ -4,10 +4,7 @@ import connector.protocol.Protocol;
 import connector.protocol.ProtocolMessage;
 import controller.Controller;
 import model.Model;
-import model.objects.MovingObject.Creature;
-import model.objects.MovingObject.Vector2D;
 import model.objects.building.Building;
-import model.objects.custumer.Customer;
 import model.objects.elevator.Elevator;
 import model.objects.elevator.ElevatorRequest;
 import model.objects.elevator.ElevatorState;
@@ -15,7 +12,6 @@ import tools.Timer;
 
 import java.util.LinkedList;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 public class ElevatorSystemController {
@@ -38,7 +34,7 @@ public class ElevatorSystemController {
 
     public void tick(long deltaTime) {
         pending.removeIf(this::tryToCallElevator);
-        for (var elevator : MODEL.getBuilding().getELEVATORS()) {
+        for (var elevator : MODEL.getBuilding().ELEVATORS) {
             timer.tick(deltaTime);
             switch (elevator.getState()) {
                 case WAIT -> processWait(elevator);
@@ -53,22 +49,23 @@ public class ElevatorSystemController {
 
     private void processOpened(Elevator elevator) {
         if (timer.isReady()) {
-            elevator.setState(ElevatorState.CLOSING);
             timer.restart(SETTINGS.ELEVATOR_OPEN_CLOSE_TIME);
+            elevator.setState(ElevatorState.CLOSING);
+            CONTROLLER.server.Send(new ProtocolMessage(Protocol.ELEVATOR_OPEN_CLOSE, elevator.getId()));
         }
     }
 
     private void processOpeningClosing(Elevator elevator) {
-        CONTROLLER.server.Send(new ProtocolMessage(Protocol.ELEVATOR_OPEN_CLOSE, elevator.getId()));
         if (timer.isReady()) {
+            if (elevator.getState() == ElevatorState.OPENING) {
+                elevator.setState(ElevatorState.OPENED);
+                System.out.println("OPENED");
+                timer.restart(SETTINGS.ELEVATOR_WAIT_AS_OPENED_TIME);
+                elevator.arrived();
+            }
             if (elevator.getState() == ElevatorState.CLOSING) {
                 elevator.setState(ElevatorState.WAIT);
                 timer.restart(SETTINGS.ELEVATOR_AFTER_CLOSE_AFK_TIME);
-            }
-            if (elevator.getState() == ElevatorState.OPENED) {
-                elevator.setState(ElevatorState.OPENED);
-                elevator.arrived();
-                timer.restart(SETTINGS.ELEVATOR_WAIT_AS_OPENED_TIME);
             }
 
         }
@@ -77,6 +74,7 @@ public class ElevatorSystemController {
     private void processInMotion(Elevator elevator) {
         if (elevator.isReachedDestination()) {
             elevator.setState(ElevatorState.OPENING);
+            CONTROLLER.server.Send(new ProtocolMessage(Protocol.ELEVATOR_OPEN_CLOSE, elevator.getId()));
             timer.restart(SETTINGS.ELEVATOR_OPEN_CLOSE_TIME);
         }
     }
@@ -102,8 +100,7 @@ public class ElevatorSystemController {
 
     private boolean tryToCallElevator(ElevatorRequest request) {
         // closest, free, and go the same way / or wait
-        LinkedList<Elevator> elevators_available = Stream
-                .of(MODEL.getBuilding().getELEVATORS())
+        LinkedList<Elevator> elevators_available = MODEL.getBuilding().ELEVATORS.stream()
                 .filter(Elevator::isAvailable)
                 .collect(Collectors.toCollection(LinkedList::new));
 
@@ -116,7 +113,7 @@ public class ElevatorSystemController {
                         (elevatorA, elevatorB) -> this.NearestElevator(request, elevatorA, elevatorB)
                 );
 
-        var requestFloor = (int) (request.button_position().y / DEFAULT_BUILDING.WALL_SIZE);
+        var requestFloor = (int) Math.round(request.button_position().y / DEFAULT_BUILDING.WALL_SIZE);
         System.out.println(requestFloor);
         closest_elevator.addFloorToPickUp(requestFloor);
         return true;
@@ -142,5 +139,9 @@ public class ElevatorSystemController {
 
     public void getOutFromElevator(Elevator currentElevator) {
         currentElevator.remove();
+    }
+
+    public void setFloorToReach(Elevator currentElevator, int floorEnd) {
+        currentElevator.addFloorToThrowOut(floorEnd);
     }
 }

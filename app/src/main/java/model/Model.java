@@ -8,6 +8,7 @@ import model.objects.MovingObject.Creature;
 import model.objects.building.Building;
 import model.objects.custumer.Customer;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -15,7 +16,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 public class Model {
-    private List<Customer> customers;
+    private LinkedList<Customer> customers;
     private Building building;
 
     public void Initialize(Building building) {
@@ -24,17 +25,6 @@ public class Model {
     }
 
     public ApplicationCreatures getDataToSent() {
-        Creature[] customers_ = new Creature[customers.size()];
-        Creature[] elevators_ = new Creature[building.getELEVATORS().length];
-        // slice information
-        int i = 0;
-        for (var customer_ : customers) {
-            customers_[i++] = new Creature(customer_);
-        }
-        for (i = 0; i < elevators_.length; i++) {
-            elevators_[i] = new Creature(building.getELEVATORS()[i]);
-        }
-
-        return new ApplicationCreatures(customers_, elevators_);
+        return new ApplicationCreatures(customers, building.ELEVATORS);
     }
 }

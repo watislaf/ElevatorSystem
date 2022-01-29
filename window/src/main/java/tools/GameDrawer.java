@@ -4,7 +4,6 @@ import model.objects.MovingObject.Creature;
 import model.objects.MovingObject.Vector2D;
 
 import java.awt.*;
-import java.util.Objects;
 
 public class GameDrawer {
     // The ratio of game coordinates to real
@@ -50,8 +49,8 @@ public class GameDrawer {
         GRAPHICS_2D.setColor(red);
     }
 
-    public void drawRect(Vector2D position, Point size) {
-        GRAPHICS_2D.drawRect(
+    public void fillRect(Vector2D position, Point size) {
+        GRAPHICS_2D.fillRect(
                 (int) (originalOffset.x + (position.x) / SCALING_COEFFICIENT),
                 (int) (REAL_SIZE.y - originalOffset.y - (position.y + size.y) / SCALING_COEFFICIENT),
                 (int) (size.x / SCALING_COEFFICIENT),
@@ -64,17 +63,32 @@ public class GameDrawer {
     }
 
     public void drawString(String text, Vector2D position) {
-        GRAPHICS_2D.drawString(text, (int) (position.x / SCALING_COEFFICIENT+ originalOffset.x),
-                (int)(REAL_SIZE.y - position.y / SCALING_COEFFICIENT - originalOffset.y));
+        GRAPHICS_2D.drawString(text, (int) (position.x / SCALING_COEFFICIENT + originalOffset.x),
+                (int) (REAL_SIZE.y - position.y / SCALING_COEFFICIENT - originalOffset.y));
     }
 
-    public void drawRect(Creature creature) {
-        GRAPHICS_2D.drawRect(
+    public void fillRect(Creature creature) {
+        GRAPHICS_2D.fillRect(
                 (int) (originalOffset.x + creature.getPosition().x / SCALING_COEFFICIENT),
                 (int) (REAL_SIZE.y - originalOffset.y -
                         (creature.getSize().y + creature.getPosition().y) / SCALING_COEFFICIENT),
                 (int) (creature.getSize().x / SCALING_COEFFICIENT),
                 (int) (creature.getSize().y / SCALING_COEFFICIENT)
         );
+    }
+
+    public void drawRect(Vector2D position, Point size, double thickness) {
+        Stroke oldStroke = GRAPHICS_2D.getStroke();
+        GRAPHICS_2D.setStroke(new BasicStroke((float) (thickness / SCALING_COEFFICIENT)));
+
+        GRAPHICS_2D.drawRect(
+                (int) (originalOffset.x + (position.x) / SCALING_COEFFICIENT),
+                (int) (REAL_SIZE.y - originalOffset.y - (position.y + size.y) / SCALING_COEFFICIENT),
+                (int) (size.x / SCALING_COEFFICIENT),
+                (int) (size.y / SCALING_COEFFICIENT)
+        );
+
+        GRAPHICS_2D.setStroke(oldStroke);
+
     }
 }

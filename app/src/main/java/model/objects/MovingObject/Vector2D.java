@@ -1,9 +1,12 @@
 package model.objects.MovingObject;
 
+import lombok.NoArgsConstructor;
+
 import java.awt.*;
 import java.awt.geom.Point2D;
 import java.io.Serializable;
 
+@NoArgsConstructor
 public class Vector2D extends Point2D.Double implements Serializable {
     public Vector2D(double x, double y) {
         super(x, y);

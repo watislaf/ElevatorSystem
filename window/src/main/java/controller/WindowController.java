@@ -9,53 +9,56 @@ import connector.protocol.Protocol;
 import connector.protocol.ProtocolMessage;
 import drawable.objects.FlyingText;
 import lombok.Setter;
-import model.ViewModel;
+import model.WindowModel;
 import model.objects.MovingObject.Vector2D;
 import view.SwingWindow;
 import connector.Client;
 
-import javax.swing.text.View;
 import java.util.concurrent.TimeUnit;
 
-public class Controller implements OnSocketEvent {
+public class WindowController implements OnSocketEvent {
     @Setter
     Client client;
-    private final ViewModel ViewMODEL;
+    private final WindowModel windowMODEL;
     SwingWindow gui;
     static private final int TPS = 55;
 
-    public Controller(ViewModel viewModel) {
-        ViewMODEL = viewModel;
+    public WindowController(WindowModel windowModel) {
+        windowMODEL = windowModel;
     }
 
     @Override
     public void onReceive(ProtocolMessage message) {
-        if (ViewMODEL.getSettings() == null && message.getProtocol() != Protocol.APPLICATION_SETTINGS) {
+        if (windowMODEL.getSettings() == null && message.getProtocol() != Protocol.APPLICATION_SETTINGS) {
             return;
         }
         switch (message.getProtocol()) {
             case APPLICATION_SETTINGS -> {
                 ApplicationSettings settings = (ApplicationSettings) message.getData();
-                ViewMODEL.setSettings(settings);
+                windowMODEL.setSettings(settings);
             }
             case UPDATE_DATA -> {
-                ViewMODEL.updateData((ApplicationCreatures) message.getData());
+                windowMODEL.updateData((ApplicationCreatures) message.getData());
             }
             case ELEVATOR_BUTTON_CLICK -> {
-                ViewMODEL.addMovingDrawable(new FlyingText("Click", (Vector2D) message.getData(),
+                windowMODEL.addMovingDrawable(new FlyingText("Click", (Vector2D) message.getData(),
                         new Vector2D(0, 100), 15, 30., 1500));
+            }
+            case ELEVATOR_OPEN_CLOSE -> {
+                System.out.println((long) message.getData());
+                windowMODEL.getElevator((long) message.getData()).getDoors().changeDoorsState();
             }
         }
     }
 
     @Override
     public void onNewConnection(DataClient message) {
-        System.out.println("connecterd");
+        System.out.println("Connected");
     }
 
     public void start() throws InterruptedException {
         gui = new SwingWindow();
-        gui.startWindow(ViewMODEL);
+        gui.startWindow(windowMODEL);
         long lastTime = System.currentTimeMillis();
 
         while (true) {
@@ -69,11 +72,11 @@ public class Controller implements OnSocketEvent {
             long deltaTime = System.currentTimeMillis() - lastTime;
             lastTime += deltaTime;
 
-            ViewMODEL.getMovingObjects().forEach(movingObject -> movingObject.tick(deltaTime));
-            ViewMODEL.clearDead();
+            windowMODEL.getDrawableOjects().forEach(object -> object.tick(deltaTime));
+            windowMODEL.clearDead();
 
 
-           gui.repaint();
+            gui.repaint();
 
         }
     }
