@@ -32,6 +32,9 @@ public class WindowModel {
     LinkedList<BlackSpace> blackSpaces;
     LinkedList<FlyingText> flyingTexts;
     LinkedList<HidingWall> hidingWall;
+    @Getter
+    @Setter
+    long lastServerRespondTime = 0;
 
     public void updateData(ApplicationCreatures data) {
         this.apply(data.getElevators(), elevators);
@@ -56,7 +59,8 @@ public class WindowModel {
                     if (customers.stream()
                             .noneMatch(creatureB -> creatureA.getId() == creatureB.getId())
                     ) {
-                        customers.add(new DrawableCustomer(creatureA, colorSettings.CUSTOMER_SKIN_COLOR));
+                        customers.add(new DrawableCustomer(creatureA,
+                                colorSettings.CUSTOMER_SKIN_COLOR));
                     }
                 }
         );
@@ -115,6 +119,8 @@ public class WindowModel {
     }
 
     public LinkedList<Drawable> getDrawableOjects() {
+        elevators.forEach(elevator -> elevator.setServerRespondTime(lastServerRespondTime));
+        customers.forEach(elevator -> elevator.setServerRespondTime(lastServerRespondTime));
         LinkedList<Drawable> drawables = new LinkedList<>();
         drawables.addAll(blackSpaces);
         drawables.addAll(elevators);

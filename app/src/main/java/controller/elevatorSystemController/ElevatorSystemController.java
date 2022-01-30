@@ -51,7 +51,7 @@ public class ElevatorSystemController {
         if (timer.isReady()) {
             elevator.setState(ElevatorState.CLOSING);
             timer.restart(SETTINGS.ELEVATOR_OPEN_CLOSE_TIME);
-            CONTROLLER.server.Send(new ProtocolMessage(Protocol.ELEVATOR_OPEN_CLOSE, elevator.getId()));
+            CONTROLLER.Send(Protocol.ELEVATOR_CLOSE, elevator.getId());
         }
     }
 
@@ -73,7 +73,7 @@ public class ElevatorSystemController {
     private void processInMotion(Elevator elevator) {
         if (elevator.isReachedDestination()) {
             elevator.setState(ElevatorState.OPENING);
-            CONTROLLER.server.Send(new ProtocolMessage(Protocol.ELEVATOR_OPEN_CLOSE, elevator.getId()));
+            CONTROLLER.Send(Protocol.ELEVATOR_OPEN, elevator.getId());
             timer.restart(SETTINGS.ELEVATOR_OPEN_CLOSE_TIME);
         }
     }
@@ -90,8 +90,7 @@ public class ElevatorSystemController {
     }
 
     public void buttonClick(ElevatorRequest request) {
-        CONTROLLER.server.Send(new ProtocolMessage(
-                Protocol.ELEVATOR_BUTTON_CLICK, request.button_position()));
+        CONTROLLER.Send(Protocol.ELEVATOR_BUTTON_CLICK, request.button_position());
         if (!tryToCallElevator(request)) {
             pending.add(request);
         }

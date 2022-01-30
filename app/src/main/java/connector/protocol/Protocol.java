@@ -9,7 +9,8 @@ public enum Protocol {
     UPDATE_DATA,     // List<Creature>
     APPLICATION_SETTINGS, // AApplicationSettings
     ELEVATOR_BUTTON_CLICK, // Vector2D
-    ELEVATOR_OPEN_CLOSE, // Integer (elevator id)
+    ELEVATOR_OPEN, // Integer (elevator id)
+    ELEVATOR_CLOSE, // Integer (elevator id)
     CUSTOMER_GET_IN_OUT, // Integer (customer id)
     // FROM_CLIENT
     CREATE_CUSTOMER,

@@ -1,5 +1,6 @@
 package controller;
 
+import connector.ConnectionSettings;
 import connector.DataClient;
 import connector.OnSocketEvent;
 import connector.Server;
@@ -8,11 +9,11 @@ import connector.protocol.Protocol;
 import connector.protocol.ProtocolMessage;
 import controller.customerController.CustomersController;
 import controller.elevatorSystemController.ElevatorSystemController;
-import lombok.Getter;
 import lombok.Setter;
 import model.Model;
 import tools.Timer;
 
+import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
 public class Controller implements OnSocketEvent {
@@ -22,9 +23,9 @@ public class Controller implements OnSocketEvent {
     private final CustomersController CUSTOMER_CONTROLLER;
 
     public final Model MODEL;
-
+    private long currentTime;
     @Setter
-    public Server server;
+    private Server server;
 
     @Override
     public void onReceive(ProtocolMessage message) {
@@ -38,7 +39,8 @@ public class Controller implements OnSocketEvent {
                 new ProtocolMessage(
                         Protocol.APPLICATION_SETTINGS,
                         new ApplicationSettings(
-                                ELEVATOR_SYSTEM_CONTROLLER.SETTINGS, CUSTOMER_CONTROLLER.SETTINGS)));
+                                ELEVATOR_SYSTEM_CONTROLLER.SETTINGS, CUSTOMER_CONTROLLER.SETTINGS),
+                        currentTime));
     }
 
     public Controller(Model model) {
@@ -57,16 +59,20 @@ public class Controller implements OnSocketEvent {
             long deltaTime = System.currentTimeMillis() - lastTime;
 
             timer.tick(deltaTime);
-            if (timer.isReady()) {
-                timer.restart(Math.round(1000. / TPS) * 20);
-                server.Send(new ProtocolMessage(Protocol.UPDATE_DATA, MODEL.getDataToSent()));
-            }
             lastTime += deltaTime;
+            currentTime = lastTime;
 
+            if (timer.isReady()) {
+                timer.restart(Math.round(1000. / ConnectionSettings.SSPS));
+                server.Send(new ProtocolMessage(Protocol.UPDATE_DATA, MODEL.getDataToSent(), currentTime));
+            }
             CUSTOMER_CONTROLLER.tick(deltaTime);
             ELEVATOR_SYSTEM_CONTROLLER.tick(deltaTime);
             MODEL.clearDead();
         }
     }
 
+    public void Send(Protocol protocol, Serializable data) {
+        server.Send(new ProtocolMessage(protocol, data, currentTime));
+    }
 }

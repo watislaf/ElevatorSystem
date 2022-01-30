@@ -11,13 +11,13 @@ public class ElevatorBorder extends Creature implements Drawable {
     private final Creature PARENT_ELEVATOR;
     private final int WALL_SIZE;
 
-    public final int BORDER_SIZE = 3;
+    public final int BORDER_SIZE = 4;
     private final Color BORDER_COLOR;
     private final Color NUMBER_COLOR;
     public ElevatorBorder(Vector2D position, Creature parentElevator, int WALL_SIZE,
                           Color borderColor, Color numberColor) {
         super(position, parentElevator.getSize());
-        size = new Point(size.x + BORDER_SIZE * 2 - 1, size.y + BORDER_SIZE);
+        size = new Point(size.x + BORDER_SIZE * 2 , size.y + BORDER_SIZE);
         PARENT_ELEVATOR = parentElevator;
         this.WALL_SIZE = WALL_SIZE;
 
@@ -30,7 +30,7 @@ public class ElevatorBorder extends Creature implements Drawable {
     public void draw(GameDrawer gameDrawer) {
         gameDrawer.setColor(BORDER_COLOR);
 
-        gameDrawer.drawRect(this.position, this.size, BORDER_SIZE + 4);
+        gameDrawer.drawRect(this.position, this.size, BORDER_SIZE*2);
 
         gameDrawer.setFont("TimesRoman", Font.PLAIN, 15);
         var positionOfText = position;

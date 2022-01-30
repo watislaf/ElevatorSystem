@@ -28,6 +28,13 @@ public class Customer extends MovingObject {
     @Getter
     private CustomerState state = CustomerState.GO_TO_BUTTON;
 
+    @Override
+    public void tick(long deltaTime) {
+        if (currentElevator != null) {
+            position = currentElevator.getPosition();
+        }
+        super.tick(deltaTime);
+    }
 
     public Customer(int currentFlor, int floorEnd, Vector2D position, double speed, Point size) {
         super(position, speed, size);

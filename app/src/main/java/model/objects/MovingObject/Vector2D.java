@@ -8,6 +8,8 @@ import java.io.Serializable;
 
 @NoArgsConstructor
 public class Vector2D extends Point2D.Double implements Serializable {
+    public static final double EPSILON = 0.0001;
+
     public Vector2D(double x, double y) {
         super(x, y);
     }
@@ -54,8 +56,26 @@ public class Vector2D extends Point2D.Double implements Serializable {
     }
 
     public Vector2D sub(Vector2D vectorB) {
-        this.x -= vectorB.x;
-        this.y -= vectorB.y;
-        return this;
+        var tmp = new Vector2D(this);
+        tmp.x -= vectorB.x;
+        tmp.y -= vectorB.y;
+        return tmp;
+    }
+
+    public Vector2D trendTo(Vector2D destination, double length) {
+        Vector2D moveDirection = new Vector2D(this).getVectorTo(destination);
+
+        if (moveDirection.getLength() > EPSILON) {
+            moveDirection = moveDirection.divide(moveDirection.getLength());
+            moveDirection = moveDirection.multiply(length);
+        }
+        var first_vector = new Vector2D(this).add(moveDirection).getVectorTo(destination);
+        var second_vector = new Vector2D(this).getVectorTo(destination);
+        if (first_vector.x * second_vector.x <= EPSILON &&
+                first_vector.y * second_vector.y <= EPSILON) {
+            return destination;
+        } else {
+            return new Vector2D(this).add(moveDirection);
+        }
     }
 }

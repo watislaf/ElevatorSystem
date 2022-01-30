@@ -4,8 +4,5 @@ import lombok.Data;
 
 import java.io.Serializable;
 
-@Data
-public class ProtocolMessage implements Serializable {
-    private final Protocol protocol;
-    private final Serializable data;
+public record ProtocolMessage(Protocol protocol, Serializable data,long timeStump) implements Serializable {
 }

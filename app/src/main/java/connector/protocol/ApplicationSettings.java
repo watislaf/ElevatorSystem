@@ -1,5 +1,6 @@
 package connector.protocol;
 
+import connector.ConnectionSettings;
 import controller.customerController.CustomerSettings;
 import controller.elevatorSystemController.ElevatorSystemSettings;
 

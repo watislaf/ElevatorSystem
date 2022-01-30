@@ -12,23 +12,26 @@ public class ElevatorDoors extends Creature implements Drawable {
 
     private final long OPEN_CLOSE_DOORS_TIME;
     private final Timer DOORS_TIMER = new Timer();
-    private final Creature PARENT_ELEVATOR;
+    private final DrawableElevator PARENT_ELEVATOR;
 
     private boolean isCLosed = true;
     private final Color DOORS_COLOR;
     private final Color DOORS_BORDER;
 
-    public ElevatorDoors(Creature creatureA, long elevatorOpenCloseTime, Color doorsColor, Color doorsBorder) {
-        super(creatureA);
+    public ElevatorDoors(DrawableElevator parentElevator, long elevatorOpenCloseTime, Color doorsColor, Color doorsBorder) {
+        super(parentElevator);
         size.x += 7;
-        PARENT_ELEVATOR = creatureA;
+        PARENT_ELEVATOR = parentElevator;
         OPEN_CLOSE_DOORS_TIME = elevatorOpenCloseTime;
         this.DOORS_COLOR = doorsColor;
         this.DOORS_BORDER = doorsBorder;
     }
 
 
-    public void changeDoorsState() {
+    public void changeDoorsState(boolean newState) {
+        if (isCLosed == newState) {
+            return;
+        }
         DOORS_TIMER.restart(OPEN_CLOSE_DOORS_TIME / 2);
         isCLosed = !isCLosed;
     }
@@ -53,7 +56,7 @@ public class ElevatorDoors extends Creature implements Drawable {
     }
 
     public void tick(long delta_time) {
-        position = PARENT_ELEVATOR.getPosition();
+        position = PARENT_ELEVATOR.getInterpolationPosition();
         DOORS_TIMER.tick(delta_time);
     }
 

@@ -15,8 +15,6 @@ import java.awt.*;
 import java.util.Random;
 
 public class CustomersController {
-
-
     @Getter
     public final CustomerSettings SETTINGS = new CustomerSettings();
     private final ElevatorSystemController elevatorSystemController;
@@ -64,7 +62,7 @@ public class CustomersController {
                 customer.getPosition().x > elevatorSystemController.SETTINGS.BUILDING_SIZE.x) {
             customer.setDead(true);
         } else {
-            CONTROLLER.server.Send(new ProtocolMessage(Protocol.CUSTOMER_GET_IN_OUT, customer.getId()));
+            CONTROLLER.Send(Protocol.CUSTOMER_GET_IN_OUT, customer.getId());
             customer.setDestination(getStartPositionFOrmCustomer(customer.getCurrentFlor()));
         }
     }
@@ -99,7 +97,7 @@ public class CustomersController {
         }
         if (customer.isReachedDestination()) {
             elevatorSystemController.getIntoElevator(closestOpenedElevator);
-            CONTROLLER.server.Send(new ProtocolMessage(Protocol.CUSTOMER_GET_IN_OUT, customer.getId()));
+            CONTROLLER.Send(Protocol.CUSTOMER_GET_IN_OUT, customer.getId());
             customer.setCurrentElevator(closestOpenedElevator);
             customer.setDestination(
                     customer.getPosition().add(

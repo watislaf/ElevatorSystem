@@ -7,9 +7,8 @@ import lombok.Setter;
 import java.awt.*;
 
 public class MovingObject extends Creature {
-
     protected static final int SPEED_COEFFICIENT = 1000;
-    private static final double EPSILON = 0.0001;
+
     @Getter
     @Setter
     protected  double speed;
@@ -36,25 +35,11 @@ public class MovingObject extends Creature {
         if (isReachedDestination()) {
             return;
         }
-        Vector2D moveDirection = new Vector2D(position).getVectorTo(destination);
-
-        if (moveDirection.getLength() > EPSILON) {
-            moveDirection = moveDirection.divide(moveDirection.getLength());
-            moveDirection = moveDirection.multiply(delta_time * speed / SPEED_COEFFICIENT);
-        }
-        var first_vector = new Vector2D(position).add(moveDirection).getVectorTo(destination);
-        var second_vector = new Vector2D(position).getVectorTo(destination);
-        if (first_vector.x * second_vector.x <= EPSILON &&
-                first_vector.y * second_vector.y <= EPSILON) {
-            position = destination;
-        } else {
-            position = new Vector2D(position).add(moveDirection);
-        }
-
+        position = position.trendTo(destination,delta_time*speed/SPEED_COEFFICIENT);
     }
 
     public boolean isReachedDestination() {
-        return new Vector2D(this.destination).getVectorTo(this.position).getLength() < EPSILON;
+        return new Vector2D(this.destination).getVectorTo(this.position).getLength() < Vector2D.EPSILON;
     }
 
     public void setDestination(Vector2D destination) {
