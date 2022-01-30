@@ -58,7 +58,7 @@ public class Controller implements OnSocketEvent {
 
             timer.tick(deltaTime);
             if (timer.isReady()) {
-                timer.restart(Math.round(1000. / TPS) * 2);
+                timer.restart(Math.round(1000. / TPS) * 20);
                 server.Send(new ProtocolMessage(Protocol.UPDATE_DATA, MODEL.getDataToSent()));
             }
             lastTime += deltaTime;

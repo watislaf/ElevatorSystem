@@ -34,7 +34,7 @@ public class SwingWindow {
         start_button_.setBackground(Color.black);
         start_button_.setFocusPainted(false);
         start_button_.setForeground(Color.black);
-        start_button_.setVisible(false);
+        start_button_.setVisible(true);
         start_panel_.add(start_button_);
     }
 
