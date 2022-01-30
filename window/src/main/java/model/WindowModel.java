@@ -2,17 +2,15 @@ package model;
 
 import connector.protocol.ApplicationCreatures;
 import connector.protocol.ApplicationSettings;
+import drawable.ColorsAndSizeSetting;
 import drawable.Drawable;
-import drawable.objects.DrawableButton;
-import drawable.objects.DrawableCustomer;
-import drawable.objects.DrawableElevator;
-import drawable.objects.FlyingText;
+import drawable.drawableObjects.*;
+import drawable.drawableObjects.Button;
 import lombok.Getter;
+import lombok.Setter;
 import model.objects.MovingObject.Creature;
 import model.objects.MovingObject.MovingObject;
 import model.objects.MovingObject.Vector2D;
-import model.objects.elevator.Elevator;
-import model.objects.elevator.ElevatorRequest;
 
 import java.awt.*;
 import java.util.Collection;
@@ -20,14 +18,20 @@ import java.util.LinkedList;
 
 
 public class WindowModel {
+    @Setter
+    @Getter
+    private ColorsAndSizeSetting colorsAndSizeSetting;
+
     @Getter
     private ApplicationSettings settings;
-
     LinkedList<DrawableElevator> elevators;
     LinkedList<DrawableCustomer> customers;
 
-    LinkedList<DrawableButton> buttons;
+    LinkedList<Button> buttons;
+    LinkedList<ElevatorBorder> border;
+    LinkedList<BlackSpace> blackSpaces;
     LinkedList<FlyingText> flyingTexts;
+    LinkedList<HidingWall> hidingWall;
 
     public void updateData(ApplicationCreatures data) {
         this.apply(data.getElevators(), elevators);
@@ -53,6 +57,40 @@ public class WindowModel {
                     }
                 }
         );
+        if (border == null) {
+            initialiseFirstData();
+        }
+    }
+
+    private void initialiseFirstData() {
+        this.buttons = new LinkedList<>();
+        this.blackSpaces = new LinkedList<>();
+        this.border = new LinkedList<>();
+        this.hidingWall = new LinkedList<>();
+        var wallSize = settings.BUILDING_SIZE.y / settings.FLOORS_COUNT;
+        double distanceBetweenElevators = ((double) settings.BUILDING_SIZE.x)
+                / (settings.ELEVATORS_COUNT + 1);
+        for (int i = 0; i < settings.FLOORS_COUNT; i++) {
+            hidingWall.add(new HidingWall(
+                    new Vector2D(settings.BUILDING_SIZE.x / 2, wallSize * i + settings.ELEVATOR_SIZE.y),
+                    new Point(settings.BUILDING_SIZE.x, (wallSize - settings.ELEVATOR_SIZE.y)),
+                    colorsAndSizeSetting.WALL_COLOR
+            ));
+            for (int j = 0; j < settings.ELEVATORS_COUNT; j++) {
+                buttons.add(new Button(
+                        new Vector2D(distanceBetweenElevators * (j + 1) + settings.BUTTON_RELATIVE_POSITION,
+                                i * wallSize + settings.ELEVATOR_SIZE.y / 2. + 5),
+                        new Point(4, 4)));
+                border.add(new ElevatorBorder(
+                        new Vector2D(distanceBetweenElevators * (j + 1), i * wallSize),
+                        elevators.get(j),
+                        wallSize));
+
+                blackSpaces.add(new BlackSpace(
+                        new Vector2D(distanceBetweenElevators * (j + 1), i * wallSize),
+                        elevators.get(j)));
+            }
+        }
     }
 
     private <T extends Creature> void apply(LinkedList<Creature> creatures_came, LinkedList<T> creatures_to_apply) {
@@ -72,11 +110,15 @@ public class WindowModel {
 
     public LinkedList<Drawable> getDrawableOjects() {
         LinkedList<Drawable> drawables = new LinkedList<>();
+        drawables.addAll(blackSpaces);
         drawables.addAll(elevators);
-        drawables.addAll(buttons);
 
-        drawables.addAll(customers);
+        drawables.addAll(customers.stream().filter(DrawableCustomer::isNotBehindElevator).toList());
         drawables.addAll(getElevatorDoors());
+        drawables.addAll(hidingWall);
+        drawables.addAll(border);
+        drawables.addAll(buttons);
+        drawables.addAll(customers.stream().filter(DrawableCustomer::isBehindElevator).toList());
         drawables.addAll(flyingTexts);
         return drawables;
     }
@@ -84,6 +126,7 @@ public class WindowModel {
     private Collection<Drawable> getElevatorDoors() {
         LinkedList<Drawable> elevatorDoors = new LinkedList<>();
         elevators.forEach(elevator -> elevatorDoors.add(elevator.getDoors()));
+
         return elevatorDoors;
     }
 
@@ -100,28 +143,14 @@ public class WindowModel {
     }
 
     public void setSettings(ApplicationSettings settings) {
-
         this.settings = settings;
         this.elevators = new LinkedList<>();
         this.customers = new LinkedList<>();
 
-        this.buttons = new LinkedList<>();
         this.flyingTexts = new LinkedList<>();
-
-        var floorHeight = settings.BUILDING_SIZE.y / settings.FLOORS_COUNT;
-        double distanceBetweenElevators = ((double) settings.BUILDING_SIZE.x)
-                / (settings.ELEVATORS_COUNT + 1);
-        for (int i = 0; i < settings.FLOORS_COUNT; i++) {
-            for (int j = 0; j < settings.ELEVATORS_COUNT; j++) {
-                buttons.add(new DrawableButton(
-                        new Vector2D(distanceBetweenElevators * (j + 1) + settings.BUTTON_RELATIVE_POSITION,
-                                i * floorHeight + settings.ELEVATOR_SIZE.y / 2.),
-                        new Point(4, 4)));
-            }
-        }
     }
 
-    public DrawableButton getNearestButton(Vector2D data) {
+    public Button getNearestButton(Vector2D data) {
         return buttons.stream()
                 .reduce(
                         null,
@@ -138,5 +167,13 @@ public class WindowModel {
                             }
                             return buttonB;
                         });
+    }
+
+    public DrawableCustomer getCustomer(long id) {
+        return customers.stream().filter(drawableCustomer -> drawableCustomer.getId() == id).findFirst().get();
+    }
+
+    public boolean isInitialised() {
+        return border != null;
     }
 }

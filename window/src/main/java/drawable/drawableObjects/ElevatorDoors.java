@@ -1,4 +1,4 @@
-package drawable.objects;
+package drawable.drawableObjects;
 
 import drawable.Drawable;
 import model.objects.MovingObject.Creature;
@@ -8,38 +8,45 @@ import tools.Timer;
 
 import java.awt.*;
 
-public class DrawableElevatorDoors extends Creature implements Drawable {
+public class ElevatorDoors extends Creature implements Drawable {
 
     private final long OPEN_CLOSE_DOORS_TIME;
     private final Timer DOORS_TIMER = new Timer();
     private final Creature PARENT_ELEVATOR;
-    boolean isCLosed = true;
 
-    public DrawableElevatorDoors(Creature creatureA, long elevatorOpenCloseTime) {
+    private boolean isCLosed = true;
+
+    public ElevatorDoors(Creature creatureA, long elevatorOpenCloseTime) {
         super(creatureA);
+        size.x += 7;
         PARENT_ELEVATOR = creatureA;
         OPEN_CLOSE_DOORS_TIME = elevatorOpenCloseTime;
+        System.out.println(elevatorOpenCloseTime);
     }
 
 
     public void changeDoorsState() {
-        DOORS_TIMER.restart(OPEN_CLOSE_DOORS_TIME);
+        DOORS_TIMER.restart(OPEN_CLOSE_DOORS_TIME/2);
         isCLosed = !isCLosed;
     }
 
     @Override
     public void draw(GameDrawer gameDrawer) {
-        gameDrawer.setColor(Color.ORANGE);
         double percentage = DOORS_TIMER.getPercent();
         if (!isCLosed) {
             percentage = 1 - percentage;
         }
-        Double openedGap = percentage * size.x / 2;
+        Double openedGap = percentage * size.x/2;
 
+        gameDrawer.setColor(Color.ORANGE);
         gameDrawer.fillRect(position.add(new Vector2D(-size.x / 2, 0)),
-                new Point((int) (size.x / 2 - openedGap), size.y));
-        gameDrawer.fillRect(position.add(new Vector2D( openedGap, 0)),
-                new Point((int) (size.x / 2 - openedGap), size.y));
+                new Point((int) (size.x / 2 - openedGap), size.y), new Color(7, 14, 7), 2);
+
+
+        gameDrawer.setColor(Color.ORANGE);
+        gameDrawer.fillRect(position.add(new Vector2D(openedGap, 0)),
+                new Point((int) (size.x / 2 - openedGap), size.y), new Color(37, 21, 13), 2);
+
     }
 
     public void tick(long delta_time) {
@@ -47,4 +54,7 @@ public class DrawableElevatorDoors extends Creature implements Drawable {
         DOORS_TIMER.tick(delta_time);
     }
 
+    public boolean isCLosed() {
+        return isCLosed && DOORS_TIMER.isReady();
+    }
 }

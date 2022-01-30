@@ -1,11 +1,8 @@
 package model.objects.MovingObject;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.swing.text.Position;
 import java.awt.*;
 import java.io.Serializable;
 
@@ -46,6 +43,8 @@ public class Creature implements Serializable {
     public void set(Creature creature) {
         this.position = creature.position;
         this.size = creature.size;
+        this.isVisible = creature.isVisible;
     }
+
 
 }

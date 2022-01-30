@@ -1,5 +1,7 @@
 package controller.customerController;
 
+import connector.protocol.Protocol;
+import connector.protocol.ProtocolMessage;
 import controller.Controller;
 import controller.elevatorSystemController.ElevatorSystemController;
 import lombok.Getter;
@@ -7,9 +9,9 @@ import model.objects.elevator.ElevatorRequest;
 import model.objects.MovingObject.Vector2D;
 import model.objects.custumer.Customer;
 import model.objects.custumer.CustomerState;
+import tools.Timer;
 
 import java.awt.*;
-import java.awt.geom.Point2D;
 import java.util.Random;
 
 public class CustomersController {
@@ -19,6 +21,7 @@ public class CustomersController {
     public final CustomerSettings SETTINGS = new CustomerSettings();
     private final ElevatorSystemController elevatorSystemController;
     private final Controller CONTROLLER;
+    private Timer timer = new Timer();
 
     public CustomersController(Controller CONTROLLER) {
         this.elevatorSystemController = CONTROLLER.ELEVATOR_SYSTEM_CONTROLLER;
@@ -26,8 +29,11 @@ public class CustomersController {
     }
 
     public void tick(long deltaTime) {
-        if (CONTROLLER.MODEL.getCustomers().isEmpty()) {
-            CreateCustomer(1, 4, SETTINGS.CUSTOMER_SIZE,
+        timer.tick(deltaTime);
+        if (CONTROLLER.MODEL.getCustomers().size() < 3) {
+            CreateCustomer(
+                    new Random().nextInt(0, 5),
+                    new Random().nextInt(0, 5), SETTINGS.CUSTOMER_SIZE,
                     new Random()
                             .doubles(
                                     SETTINGS.CUSTOMER_SPEED
@@ -58,6 +64,7 @@ public class CustomersController {
                 customer.getPosition().x > elevatorSystemController.SETTINGS.BUILDING_SIZE.x) {
             customer.setDead(true);
         } else {
+            CONTROLLER.server.Send(new ProtocolMessage(Protocol.CUSTOMER_GET_IN_OUT, customer.getId()));
             customer.setDestination(getStartPositionFOrmCustomer(customer.getCurrentFlor()));
         }
     }
@@ -83,15 +90,17 @@ public class CustomersController {
     }
 
     private void processGetIn(Customer customer) {
-        var nearestOpenedElevator = CONTROLLER.MODEL.getBuilding()
-                .getNearestOpenedElevatorOnFloor(customer.getPosition(), customer.getCurrentFlor());
-        if (nearestOpenedElevator == null) {
+        var closestOpenedElevator = CONTROLLER.MODEL.getBuilding()
+                .getClosestOpenedElevatorOnFloor(customer.getPosition(), customer.getCurrentFlor());
+        if (closestOpenedElevator == null) {
             customer.setState(CustomerState.GO_TO_BUTTON);
+            customer.setSpeed(SETTINGS.CUSTOMER_SPEED);
             return;
         }
         if (customer.isReachedDestination()) {
-            elevatorSystemController.getIntoElevator(nearestOpenedElevator);
-            customer.setCurrentElevator(nearestOpenedElevator);
+            elevatorSystemController.getIntoElevator(closestOpenedElevator);
+            CONTROLLER.server.Send(new ProtocolMessage(Protocol.CUSTOMER_GET_IN_OUT, customer.getId()));
+            customer.setCurrentElevator(closestOpenedElevator);
             customer.setDestination(
                     customer.getPosition().add(
                             new Vector2D(new Random()
@@ -101,15 +110,24 @@ public class CustomersController {
                                     , 0)));
             customer.setState(CustomerState.STAY_IN);
             elevatorSystemController.setFloorToReach(customer.getCurrentElevator(), customer.getFloorEnd());
+            customer.setSpeed(SETTINGS.CUSTOMER_SPEED);
+
         }
     }
 
     private void processWaitUntillArrived(Customer customer) {
         var nearestOpenedElevatorOnFloor = CONTROLLER.MODEL.getBuilding()
-                .getNearestOpenedElevatorOnFloor(customer.getPosition(), customer.getCurrentFlor());
+                .getClosestOpenedElevatorOnFloor(customer.getPosition(), customer.getCurrentFlor());
         if (nearestOpenedElevatorOnFloor != null) {
             customer.setDestination(nearestOpenedElevatorOnFloor.getPosition());
             customer.setState(CustomerState.GET_IN);
+            customer.setSpeed(SETTINGS.CUSTOMER_SPEED * 1.4);
+        } else {
+            if (timer.isReady()) {
+                customer.setDestination(new Vector2D(new Random().nextInt(0, elevatorSystemController.SETTINGS.BUILDING_SIZE.x),
+                        customer.getPosition().y));
+                timer.restart(3000);
+            }
         }
     }
 
@@ -124,10 +142,15 @@ public class CustomersController {
             elevatorSystemController.buttonClick(
                     new ElevatorRequest(customer.getPosition(), customer.wantsGoUp()));
             customer.setState(CustomerState.WAIT_UNTIL_ARRIVED);
+            timer.restart(1000);
+            customer.setSpeed(SETTINGS.CUSTOMER_SPEED * 0.5);
         }
     }
 
     private void CreateCustomer(int floorStart, int floorEnd, Point customer_size, double speed) {
+        if (floorEnd == floorStart) {
+            floorEnd = (floorEnd - 1) % elevatorSystemController.SETTINGS.FLOORS_COUNT;
+        }
         var startPosition = getStartPositionFOrmCustomer(floorStart);
         var customer = new Customer(
                 floorStart, floorEnd, startPosition, speed,

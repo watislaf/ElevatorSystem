@@ -7,7 +7,8 @@ import connector.protocol.ApplicationCreatures;
 import connector.protocol.ApplicationSettings;
 import connector.protocol.Protocol;
 import connector.protocol.ProtocolMessage;
-import drawable.objects.FlyingText;
+import drawable.ColorsAndSizeSetting;
+import drawable.drawableObjects.FlyingText;
 import lombok.Setter;
 import model.WindowModel;
 import model.objects.MovingObject.Vector2D;
@@ -21,10 +22,12 @@ public class WindowController implements OnSocketEvent {
     Client client;
     private final WindowModel windowMODEL;
     SwingWindow gui;
-    static private final int TPS = 55;
+    static private final int TPS = 25;
 
     public WindowController(WindowModel windowModel) {
         windowMODEL = windowModel;
+        ColorsAndSizeSetting colorsAndSizeSetting = new ColorsAndSizeSetting();
+        windowMODEL.setColorsAndSizeSetting(colorsAndSizeSetting);
     }
 
     @Override
@@ -36,6 +39,8 @@ public class WindowController implements OnSocketEvent {
             case APPLICATION_SETTINGS -> {
                 ApplicationSettings settings = (ApplicationSettings) message.getData();
                 windowMODEL.setSettings(settings);
+            }
+            case OK -> {
             }
             case UPDATE_DATA -> {
                 windowMODEL.updateData((ApplicationCreatures) message.getData());
@@ -49,6 +54,9 @@ public class WindowController implements OnSocketEvent {
             case ELEVATOR_OPEN_CLOSE -> {
                 System.out.println((long) message.getData());
                 windowMODEL.getElevator((long) message.getData()).getDoors().changeDoorsState();
+            }
+            case CUSTOMER_GET_IN_OUT -> {
+                windowMODEL.getCustomer((long) message.getData()).changeBehindElevator();
             }
         }
     }
@@ -74,13 +82,11 @@ public class WindowController implements OnSocketEvent {
             long deltaTime = System.currentTimeMillis() - lastTime;
             lastTime += deltaTime;
 
-            if (windowMODEL.getSettings() != null) {
+            if (windowMODEL.isInitialised()) {
                 windowMODEL.getDrawableOjects().forEach(object -> object.tick(deltaTime));
                 windowMODEL.clearDead();
-
             }
             gui.repaint();
-
         }
     }
 }

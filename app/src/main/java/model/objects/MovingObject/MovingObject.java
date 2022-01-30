@@ -8,9 +8,11 @@ import java.awt.*;
 
 public class MovingObject extends Creature {
 
-    private static final int SPEED_COEFFICIENT = 1000;
+    protected static final int SPEED_COEFFICIENT = 1000;
     private static final double EPSILON = 0.0001;
-    protected final double SPEED;
+    @Getter
+    @Setter
+    protected  double speed;
     @Getter
     @Setter
     protected boolean isDead = false;
@@ -21,13 +23,13 @@ public class MovingObject extends Creature {
     public MovingObject(Vector2D position, double speed, Point size) {
         super(position, size);
         this.destination = position;
-        this.SPEED = speed;
+        this.speed = speed;
     }
 
     public MovingObject(Vector2D position, double speed) {
         super(position);
         this.destination = position;
-        this.SPEED = speed;
+        this.speed = speed;
     }
 
     public void tick(long delta_time) {
@@ -38,7 +40,7 @@ public class MovingObject extends Creature {
 
         if (moveDirection.getLength() > EPSILON) {
             moveDirection = moveDirection.divide(moveDirection.getLength());
-            moveDirection = moveDirection.multiply(delta_time * SPEED / SPEED_COEFFICIENT);
+            moveDirection = moveDirection.multiply(delta_time * speed / SPEED_COEFFICIENT);
         }
         var first_vector = new Vector2D(position).add(moveDirection).getVectorTo(destination);
         var second_vector = new Vector2D(position).getVectorTo(destination);

@@ -1,11 +1,9 @@
 package model.objects.building;
 
 import controller.elevatorSystemController.ElevatorSystemSettings;
-import lombok.Getter;
 import model.objects.elevator.Elevator;
 import model.objects.MovingObject.Vector2D;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Random;
 
@@ -54,7 +52,7 @@ public class Building {
         return nearestButton;
     }
 
-    public Elevator getNearestOpenedElevatorOnFloor(Vector2D position, int floor) {
+    public Elevator getClosestOpenedElevatorOnFloor(Vector2D position, int floor) {
         if (!isOpenedElevatorOnFloorExist(floor)) {
             return null;
         }

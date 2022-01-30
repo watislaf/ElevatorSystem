@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import model.objects.MovingObject.Creature;
+import model.objects.MovingObject.MovingObject;
 import model.objects.building.Building;
 import model.objects.custumer.Customer;
 
@@ -22,6 +23,10 @@ public class Model {
     public void Initialize(Building building) {
         this.building = building;
         this.customers = new LinkedList<>();
+    }
+
+    public void clearDead() {
+        customers.removeIf(MovingObject::isDead);
     }
 
     public ApplicationCreatures getDataToSent() {

@@ -49,8 +49,8 @@ public class ElevatorSystemController {
 
     private void processOpened(Elevator elevator) {
         if (timer.isReady()) {
-            timer.restart(SETTINGS.ELEVATOR_OPEN_CLOSE_TIME);
             elevator.setState(ElevatorState.CLOSING);
+            timer.restart(SETTINGS.ELEVATOR_OPEN_CLOSE_TIME);
             CONTROLLER.server.Send(new ProtocolMessage(Protocol.ELEVATOR_OPEN_CLOSE, elevator.getId()));
         }
     }
@@ -59,8 +59,8 @@ public class ElevatorSystemController {
         if (timer.isReady()) {
             if (elevator.getState() == ElevatorState.OPENING) {
                 elevator.setState(ElevatorState.OPENED);
-                System.out.println("OPENED");
                 timer.restart(SETTINGS.ELEVATOR_WAIT_AS_OPENED_TIME);
+                System.out.println("OPENED");
                 elevator.arrived();
             }
             if (elevator.getState() == ElevatorState.CLOSING) {
@@ -110,20 +110,29 @@ public class ElevatorSystemController {
         Elevator closest_elevator = elevators_available.stream()
                 .reduce(
                         null,
-                        (elevatorA, elevatorB) -> this.NearestElevator(request, elevatorA, elevatorB)
+                        (elevatorA, elevatorB) -> this.closestElevator(request, elevatorA, elevatorB)
                 );
 
         var requestFloor = (int) Math.round(request.button_position().y / DEFAULT_BUILDING.WALL_SIZE);
-        System.out.println(requestFloor);
         closest_elevator.addFloorToPickUp(requestFloor);
         return true;
     }
 
-    private Elevator NearestElevator(ElevatorRequest request, Elevator elevatorA, Elevator elevatorB) {
+    private Elevator closestElevator(ElevatorRequest request, Elevator elevatorA, Elevator elevatorB) {
         if (elevatorA == null) {
             return elevatorB;
         }
         if (elevatorB == null) {
+            return elevatorA;
+        }
+
+        var requestFloor = (int) Math.round(request.button_position().y / DEFAULT_BUILDING.WALL_SIZE);
+        double timeToBeA = elevatorA.getTimeToBeeHere(requestFloor);
+        double timeToBeB = elevatorB.getTimeToBeeHere(requestFloor);
+        if (timeToBeA > timeToBeB) {
+            return elevatorB;
+        }
+        if (timeToBeA < timeToBeB) {
             return elevatorA;
         }
         if (request.button_position().getNearest(elevatorA.getPosition(), elevatorB.getPosition())
@@ -134,6 +143,7 @@ public class ElevatorSystemController {
     }
 
     public void getIntoElevator(Elevator nearestOpenedElevator) {
+
         nearestOpenedElevator.put();
     }
 

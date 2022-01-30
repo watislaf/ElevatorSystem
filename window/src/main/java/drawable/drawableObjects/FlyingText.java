@@ -1,4 +1,4 @@
-package drawable.objects;
+package drawable.drawableObjects;
 
 import drawable.Drawable;
 import model.objects.MovingObject.MovingObject;

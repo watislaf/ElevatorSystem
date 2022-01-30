@@ -1,4 +1,4 @@
-package drawable.objects;
+package drawable.drawableObjects;
 
 import drawable.Drawable;
 import model.objects.MovingObject.Creature;
@@ -9,12 +9,12 @@ import tools.Timer;
 import java.awt.*;
 
 
-public class DrawableButton extends Creature implements Drawable {
+public class Button extends Creature implements Drawable {
     private final long BUTTON_ON_TIME = 500;
     Timer buttonOnTimer = new Timer();
     Color color = Color.GREEN;
 
-    public DrawableButton(Vector2D position, Point size) {
+    public Button(Vector2D position, Point size) {
         super(position, size);
     }
 

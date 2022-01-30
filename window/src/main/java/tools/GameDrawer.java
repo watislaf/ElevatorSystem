@@ -57,6 +57,19 @@ public class GameDrawer {
                 (int) (size.y / SCALING_COEFFICIENT)
         );
     }
+    public void fillRect(Vector2D position, Point size, Color borderColor, int thickness) {
+        fillRect(position,size);
+        Stroke oldStroke = GRAPHICS_2D.getStroke();
+        GRAPHICS_2D.setColor(borderColor);
+        GRAPHICS_2D.setStroke(new BasicStroke((float) (thickness / SCALING_COEFFICIENT)));
+        GRAPHICS_2D.drawRect(
+                (int) (originalOffset.x + (position.x) / SCALING_COEFFICIENT),
+                (int) (REAL_SIZE.y - originalOffset.y - (position.y + size.y) / SCALING_COEFFICIENT),
+                (int) (size.x / SCALING_COEFFICIENT),
+                (int) (size.y / SCALING_COEFFICIENT)
+        );
+        GRAPHICS_2D.setStroke(oldStroke);
+    }
 
     public void setFont(String fontName, int type, int size) {
         GRAPHICS_2D.setFont(new Font(fontName, type, (int) (size / SCALING_COEFFICIENT)));

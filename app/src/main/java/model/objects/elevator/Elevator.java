@@ -6,12 +6,12 @@ import lombok.Setter;
 import model.objects.MovingObject.MovingObject;
 import model.objects.MovingObject.Vector2D;
 import model.objects.custumer.Customer;
-import tools.Timer;
 
 import java.awt.*;
 import java.util.*;
 
 public class Elevator extends MovingObject {
+    private final long TIME_TO_STOP_ON_FLOOR;
     public final int UNEXIST_FLOOR = 999;
 
     private final double WALL_SIZE;
@@ -83,6 +83,8 @@ public class Elevator extends MovingObject {
         this.BUILDING_SIZE = settings.BUILDING_SIZE;
         this.state = ElevatorState.WAIT;
         this.WALL_SIZE = wall_size;
+        this.TIME_TO_STOP_ON_FLOOR = settings.ELEVATOR_OPEN_CLOSE_TIME * 2 +
+                settings.ELEVATOR_AFTER_CLOSE_AFK_TIME + settings.ELEVATOR_WAIT_AS_OPENED_TIME;
     }
 
     public int getCurrentFloor() {
@@ -156,5 +158,69 @@ public class Elevator extends MovingObject {
             setToWorkWith = THROW_OUT_BOTTOM;
         }
         setToWorkWith.add(floorEnd);
+    }
+
+    public double getTimeToBeeHere(int requestFloor) {
+        if (currentCustomersCount + currentBookedCount == 0) {
+            return getTimeToGetTo(requestFloor);
+        }
+        TreeSet<Integer> onTheWay = new TreeSet<>();
+        TreeSet<Integer> notOnTheWay = new TreeSet<>();
+
+        if (isGoUp) {
+            PICK_UP_TOP.forEach((key, value) -> onTheWay.add(key));
+            onTheWay.addAll(THROW_OUT_TOP.stream().toList());
+            PICK_UP_BOTTOM.forEach((key, value) -> notOnTheWay.add(key));
+            notOnTheWay.addAll(THROW_OUT_BOTTOM.stream().toList());
+        } else {
+            PICK_UP_BOTTOM.forEach((key, value) -> onTheWay.add(key));
+            onTheWay.addAll(THROW_OUT_BOTTOM.stream().toList());
+            PICK_UP_TOP.forEach((key, value) -> notOnTheWay.add(key));
+            notOnTheWay.addAll(THROW_OUT_TOP.stream().toList());
+        }
+        onTheWay.add(requestFloor);
+        notOnTheWay.add(requestFloor);
+        Integer[] onTheWaySorted = (onTheWay).toArray(new Integer[onTheWay.size()]);
+        Integer[] notOnTheWaySorted = (notOnTheWay).toArray(new Integer[notOnTheWay.size()]);
+        double penalty = 0;
+        int curr = getCurrentFloor();
+        if (isGoUp) {
+            Arrays.sort(onTheWaySorted);
+            Arrays.sort(notOnTheWaySorted);
+            if (position.y < getPositionForFloor(requestFloor)) {
+                penalty = Arrays.binarySearch(onTheWaySorted, requestFloor) * TIME_TO_STOP_ON_FLOOR;
+            } else {
+                penalty = ((notOnTheWaySorted.length - (Arrays.binarySearch(notOnTheWaySorted, requestFloor) - 1) + onTheWaySorted.length - 1)
+                        * TIME_TO_STOP_ON_FLOOR);
+
+                penalty += getTimeToGetTo(onTheWaySorted[onTheWaySorted.length - 1]) * 2;
+
+            }
+            // 5 6 7 9  on the way
+            //4 2 1 not on the way
+
+        } else {
+            Arrays.sort(onTheWaySorted);
+            Arrays.sort(notOnTheWaySorted);
+            // 4 2 1 on the way
+            // 5 7 9  not on the way
+            if (position.y > getPositionForFloor(requestFloor)) {
+                penalty = (notOnTheWaySorted.length - Arrays.binarySearch(onTheWaySorted, requestFloor) - 1)
+                        * TIME_TO_STOP_ON_FLOOR;
+            } else {
+                penalty = ((Arrays.binarySearch(notOnTheWaySorted, requestFloor) + onTheWaySorted.length - 1)
+                        * TIME_TO_STOP_ON_FLOOR);
+                penalty += getTimeToGetTo(onTheWaySorted[onTheWaySorted.length - 1]) * 2;
+            }
+        }
+        return getTimeToGetTo(requestFloor) + penalty;
+    }
+
+    private double getPositionForFloor(int requestFloor) {
+        return requestFloor * WALL_SIZE;
+    }
+
+    private double getTimeToGetTo(int requestFloor) {
+        return Math.abs(getPositionForFloor(requestFloor) - position.y) * SPEED_COEFFICIENT / speed;
     }
 }

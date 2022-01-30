@@ -65,6 +65,7 @@ public class Controller implements OnSocketEvent {
 
             CUSTOMER_CONTROLLER.tick(deltaTime);
             ELEVATOR_SYSTEM_CONTROLLER.tick(deltaTime);
+            MODEL.clearDead();
         }
     }
 
