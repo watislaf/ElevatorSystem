@@ -23,7 +23,6 @@ public class ElevatorDoors extends Creature implements Drawable {
         size.x += 7;
         PARENT_ELEVATOR = creatureA;
         OPEN_CLOSE_DOORS_TIME = elevatorOpenCloseTime;
-        System.out.println(elevatorOpenCloseTime);
         this.DOORS_COLOR = doorsColor;
         this.DOORS_BORDER = doorsBorder;
     }

@@ -60,7 +60,6 @@ public class ElevatorSystemController {
             if (elevator.getState() == ElevatorState.OPENING) {
                 elevator.setState(ElevatorState.OPENED);
                 timer.restart(SETTINGS.ELEVATOR_WAIT_AS_OPENED_TIME);
-                System.out.println("OPENED");
                 elevator.arrived();
             }
             if (elevator.getState() == ElevatorState.CLOSING) {
@@ -115,6 +114,7 @@ public class ElevatorSystemController {
 
         var requestFloor = (int) Math.round(request.button_position().y / DEFAULT_BUILDING.WALL_SIZE);
         closest_elevator.addFloorToPickUp(requestFloor);
+        closest_elevator.findBestFloor();
         return true;
     }
 
@@ -153,5 +153,6 @@ public class ElevatorSystemController {
 
     public void setFloorToReach(Elevator currentElevator, int floorEnd) {
         currentElevator.addFloorToThrowOut(floorEnd);
+        currentElevator.findBestFloor();
     }
 }

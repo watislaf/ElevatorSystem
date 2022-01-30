@@ -39,7 +39,7 @@ public class Building {
         }
     }
 
-    public Vector2D getNearestButtonOnFloor(Vector2D position, int floorStart) {
+    public Vector2D getClosestButtonOnFloor(Vector2D position, int floorStart) {
         if (ELEVATORS.size() == 0) {
             return null;
         }
@@ -59,17 +59,21 @@ public class Building {
         if (ELEVATORS.size() == 0) {
             return null;
         }
-        Elevator nearestElevator = ELEVATORS.get(0);
+        Elevator closestElevator = null;
         for (var elevator : ELEVATORS) {
             if (elevator.getCurrentFloor() == floor && elevator.isOpened()) {
+                if (closestElevator == null) {
+                    closestElevator = elevator;
+                    continue;
+                }
                 var nearestElevatorPosition = position.getNearest(elevator.getPosition(),
-                        nearestElevator.getPosition());
+                        closestElevator.getPosition());
                 if (nearestElevatorPosition == elevator.getPosition()) {
-                    nearestElevator = elevator;
+                    closestElevator = elevator;
                 }
             }
         }
-        return nearestElevator;
+        return closestElevator;
     }
 
     private boolean isOpenedElevatorOnFloorExist(int floor) {

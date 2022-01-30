@@ -57,12 +57,10 @@ public class SwingWindow {
 
 
     public void repaint() {
-        //       WINDOW_SIZE_.y = frame_.getSize().height;
-        //       double y_position = (400);
-//        start_button_.setBounds(
-//                new Rectangle((WINDOW_SIZE_.x - 14) / 2, (int) y_position
-//                        , 555, 555));
-        //       WINDOW_SIZE_.x = frame_.getSize().width;
+        //      WINDOW_SIZE_.y = frame_.getSize().height;
+        //      double y_position = (400);
+        //      start_button_.setBounds(new Rectangle((WINDOW_SIZE_.x - 14) / 2, (int) y_position, 555, 555));
+        //      WINDOW_SIZE_.x = frame_.getSize().width;
         frame_.repaint();
     }
 }

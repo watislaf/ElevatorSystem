@@ -54,7 +54,6 @@ public class WindowController implements OnSocketEvent {
                 windowMODEL.getNearestButton((Vector2D) message.getData()).buttonClick();
             }
             case ELEVATOR_OPEN_CLOSE -> {
-                System.out.println((long) message.getData());
                 windowMODEL.getElevator((long) message.getData()).getDoors().changeDoorsState();
             }
             case CUSTOMER_GET_IN_OUT -> {

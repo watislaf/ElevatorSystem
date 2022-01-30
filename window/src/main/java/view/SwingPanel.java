@@ -43,15 +43,16 @@ class SwingPanel extends JPanel {
             gameDrawer.drawRect(
                     new Vector2D(VIEW_MODEL.getSettings().BUILDING_SIZE.x / 2., i * floorHeight),
                     new Point(VIEW_MODEL.getSettings().BUILDING_SIZE.x, floorHeight), 7);
+
             gameDrawer.setColor(VIEW_MODEL.getColorSettings().BLACK_SPACE_COLOR);
             gameDrawer.fillRect(
-                    new Vector2D(0 - VIEW_MODEL.getSettings().CUSTOMER_SIZE.x, i * floorHeight),
-                    new Point(VIEW_MODEL.getSettings().CUSTOMER_SIZE.x, floorHeight)
+                    new Vector2D(0 - VIEW_MODEL.getSettings().CUSTOMER_SIZE.x * 2, i * floorHeight),
+                    new Point(VIEW_MODEL.getSettings().CUSTOMER_SIZE.x * 2, floorHeight)
             );
             gameDrawer.fillRect(
                     new Vector2D(
                             VIEW_MODEL.getSettings().BUILDING_SIZE.x, i * floorHeight),
-                    new Point(VIEW_MODEL.getSettings().CUSTOMER_SIZE.x, floorHeight)
+                    new Point(VIEW_MODEL.getSettings().CUSTOMER_SIZE.x * 2, floorHeight)
             );
         }
 

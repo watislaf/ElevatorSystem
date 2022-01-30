@@ -30,7 +30,7 @@ public class CustomersController {
 
     public void tick(long deltaTime) {
         timer.tick(deltaTime);
-        if (CONTROLLER.MODEL.getCustomers().size() < 3) {
+        if (CONTROLLER.MODEL.getCustomers().size() <2) {
             CreateCustomer(
                     new Random().nextInt(0, 5),
                     new Random().nextInt(0, 5), SETTINGS.CUSTOMER_SIZE,
@@ -133,7 +133,7 @@ public class CustomersController {
 
     private void processGotOButton(Customer customer) {
         var buttonPosition = CONTROLLER.MODEL.getBuilding()
-                .getNearestButtonOnFloor(customer.getPosition(), customer.getCurrentFlor());
+                .getClosestButtonOnFloor(customer.getPosition(), customer.getCurrentFlor());
         if (buttonPosition == null) {
 //            customer.setState(CustomerState.); // TODO add walking mehanick
         }
@@ -148,9 +148,6 @@ public class CustomersController {
     }
 
     private void CreateCustomer(int floorStart, int floorEnd, Point customer_size, double speed) {
-        if (floorEnd == floorStart) {
-            floorEnd = (floorEnd - 1) % elevatorSystemController.SETTINGS.FLOORS_COUNT;
-        }
         var startPosition = getStartPositionFOrmCustomer(floorStart);
         var customer = new Customer(
                 floorStart, floorEnd, startPosition, speed,
