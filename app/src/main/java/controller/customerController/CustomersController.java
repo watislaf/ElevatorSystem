@@ -28,10 +28,12 @@ public class CustomersController {
 
     public void tick(long deltaTime) {
         timer.tick(deltaTime);
-        if (CONTROLLER.MODEL.getCustomers().size() <2) {
-            CreateCustomer(
-                    new Random().nextInt(0, 5),
-                    new Random().nextInt(0, 5), SETTINGS.CUSTOMER_SIZE,
+        if (CONTROLLER.MODEL.getCustomers().size() < 2) {
+            int startFloor = new Random().nextInt(0, elevatorSystemController.SETTINGS.FLOORS_COUNT);
+            int endFloor = new Random().nextInt(0, elevatorSystemController.SETTINGS.FLOORS_COUNT);
+            endFloor += startFloor % 5;
+            CreateCustomer(startFloor,
+                    endFloor, SETTINGS.CUSTOMER_SIZE,
                     new Random()
                             .doubles(
                                     SETTINGS.CUSTOMER_SPEED
@@ -58,8 +60,8 @@ public class CustomersController {
         if (!customer.isReachedDestination()) {
             return;
         }
-        if (customer.getPosition().x < 0 ||
-                customer.getPosition().x > elevatorSystemController.SETTINGS.BUILDING_SIZE.x) {
+        if (customer.getPosition().x < -customer.getSize().x ||
+                customer.getPosition().x > elevatorSystemController.SETTINGS.BUILDING_SIZE.x + customer.getSize().x) {
             customer.setDead(true);
         } else {
             CONTROLLER.Send(Protocol.CUSTOMER_GET_IN_OUT, customer.getId());
@@ -160,9 +162,9 @@ public class CustomersController {
         Vector2D start_position = CONTROLLER.MODEL.getBuilding().getStartPositionAfterBuilding(floorStart);
         // So u can't see customer whet it spawns
         if (start_position.x == 0) {
-            start_position.x -= SETTINGS.CUSTOMER_SIZE.x / 2.;
+            start_position.x -= SETTINGS.CUSTOMER_SIZE.x * 2;
         } else {
-            start_position.x += SETTINGS.CUSTOMER_SIZE.x / 2.;
+            start_position.x += SETTINGS.CUSTOMER_SIZE.x * 2;
         }
         return start_position;
     }

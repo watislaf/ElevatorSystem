@@ -37,11 +37,11 @@ public class WindowModel {
     long lastServerRespondTime = 0;
 
     public void updateData(ApplicationCreatures data) {
-        this.apply(data.getElevators(), elevators);
-        this.apply(data.getCustomers(), customers);
+        this.apply(data.ELEVATORS, elevators);
+        this.apply(data.CUSTOMERS, customers);
 
         // Add
-        data.getElevators().forEach(
+        data.ELEVATORS.forEach(
                 creatureA -> {
                     if (elevators.stream()
                             .noneMatch(creatureB -> creatureA.getId() == creatureB.getId())
@@ -54,7 +54,7 @@ public class WindowModel {
                 }
         );
 
-        data.getCustomers().forEach(
+        data.CUSTOMERS.forEach(
                 creatureA -> {
                     if (customers.stream()
                             .noneMatch(creatureB -> creatureA.getId() == creatureB.getId())

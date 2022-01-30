@@ -95,7 +95,6 @@ public class WindowController implements OnSocketEvent {
             case UPDATE_DATA -> {
                 windowMODEL.updateData((ApplicationCreatures) message.data());
                 windowMODEL.setLastServerRespondTime(2 * (message.timeStump() - currentTime));
-                System.out.println(windowMODEL.getLastServerRespondTime());
             }
             case ELEVATOR_BUTTON_CLICK -> {
                 windowMODEL.addMovingDrawable(

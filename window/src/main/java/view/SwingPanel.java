@@ -16,7 +16,7 @@ class SwingPanel extends JPanel {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+//        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
 
         if (!VIEW_MODEL.isInitialised()) {
@@ -46,13 +46,13 @@ class SwingPanel extends JPanel {
 
             gameDrawer.setColor(VIEW_MODEL.getColorSettings().BLACK_SPACE_COLOR);
             gameDrawer.fillRect(
-                    new Vector2D(0 - VIEW_MODEL.getSettings().CUSTOMER_SIZE.x * 2, i * floorHeight),
-                    new Point(VIEW_MODEL.getSettings().CUSTOMER_SIZE.x * 2, floorHeight)
+                    new Vector2D(0 - VIEW_MODEL.getSettings().CUSTOMER_SIZE.x * 4, i * floorHeight),
+                    new Point(VIEW_MODEL.getSettings().CUSTOMER_SIZE.x * 4, floorHeight)
             );
             gameDrawer.fillRect(
                     new Vector2D(
                             VIEW_MODEL.getSettings().BUILDING_SIZE.x, i * floorHeight),
-                    new Point(VIEW_MODEL.getSettings().CUSTOMER_SIZE.x * 2, floorHeight)
+                    new Point(VIEW_MODEL.getSettings().CUSTOMER_SIZE.x * 4, floorHeight)
             );
         }
 
