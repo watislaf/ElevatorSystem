@@ -10,10 +10,12 @@ import tools.GameDrawer;
 import java.awt.*;
 
 public class DrawableCustomer extends Creature implements Drawable {
-    public DrawableCustomer(Creature creature) {
+    public DrawableCustomer(Creature creature, Color color) {
         super(creature);
+        this.color = color;
     }
 
+    Color color;
     @Getter
     @Setter
     boolean behindElevator = true;
@@ -23,8 +25,8 @@ public class DrawableCustomer extends Creature implements Drawable {
         if (!isVisible()) {
             return;
         }
-        gameDrawer.setColor(Color.pink);
-        gameDrawer.fillRect(this);
+        gameDrawer.setColor(color);
+        gameDrawer.fillRect(this.position, this.size, Color.DARK_GRAY, 2);
     }
 
     @Override

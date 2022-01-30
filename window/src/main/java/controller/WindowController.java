@@ -7,7 +7,7 @@ import connector.protocol.ApplicationCreatures;
 import connector.protocol.ApplicationSettings;
 import connector.protocol.Protocol;
 import connector.protocol.ProtocolMessage;
-import drawable.ColorsAndSizeSetting;
+import drawable.ColorSettings;
 import drawable.drawableObjects.FlyingText;
 import lombok.Setter;
 import model.WindowModel;
@@ -26,8 +26,8 @@ public class WindowController implements OnSocketEvent {
 
     public WindowController(WindowModel windowModel) {
         windowMODEL = windowModel;
-        ColorsAndSizeSetting colorsAndSizeSetting = new ColorsAndSizeSetting();
-        windowMODEL.setColorsAndSizeSetting(colorsAndSizeSetting);
+        ColorSettings colorSettings = new ColorSettings();
+        windowMODEL.setColorSettings(colorSettings);
     }
 
     @Override
@@ -46,9 +46,11 @@ public class WindowController implements OnSocketEvent {
                 windowMODEL.updateData((ApplicationCreatures) message.getData());
             }
             case ELEVATOR_BUTTON_CLICK -> {
-                windowMODEL.addMovingDrawable(new FlyingText("Click", ((Vector2D) message.getData())
-                        .add(new Vector2D(0, windowMODEL.getSettings().CUSTOMER_SIZE.y)),
-                        new Vector2D(0, 100), 15, 30., 1500));
+                windowMODEL.addMovingDrawable(
+                        new FlyingText("Click", ((Vector2D) message.getData())
+                                .add(new Vector2D(0, windowMODEL.getSettings().CUSTOMER_SIZE.y)),
+                                new Vector2D(0, 100), 15, 30., 1500,
+                                windowMODEL.getColorSettings().TEXT_COLOR));
                 windowMODEL.getNearestButton((Vector2D) message.getData()).buttonClick();
             }
             case ELEVATOR_OPEN_CLOSE -> {

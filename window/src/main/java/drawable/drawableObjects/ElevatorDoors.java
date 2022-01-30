@@ -15,18 +15,22 @@ public class ElevatorDoors extends Creature implements Drawable {
     private final Creature PARENT_ELEVATOR;
 
     private boolean isCLosed = true;
+    private final Color DOORS_COLOR;
+    private final Color DOORS_BORDER;
 
-    public ElevatorDoors(Creature creatureA, long elevatorOpenCloseTime) {
+    public ElevatorDoors(Creature creatureA, long elevatorOpenCloseTime, Color doorsColor, Color doorsBorder) {
         super(creatureA);
         size.x += 7;
         PARENT_ELEVATOR = creatureA;
         OPEN_CLOSE_DOORS_TIME = elevatorOpenCloseTime;
         System.out.println(elevatorOpenCloseTime);
+        this.DOORS_COLOR = doorsColor;
+        this.DOORS_BORDER = doorsBorder;
     }
 
 
     public void changeDoorsState() {
-        DOORS_TIMER.restart(OPEN_CLOSE_DOORS_TIME/2);
+        DOORS_TIMER.restart(OPEN_CLOSE_DOORS_TIME / 2);
         isCLosed = !isCLosed;
     }
 
@@ -36,16 +40,16 @@ public class ElevatorDoors extends Creature implements Drawable {
         if (!isCLosed) {
             percentage = 1 - percentage;
         }
-        Double openedGap = percentage * size.x/2;
+        Double openedGap = percentage * size.x / 2;
 
-        gameDrawer.setColor(Color.ORANGE);
+        gameDrawer.setColor(DOORS_COLOR);
         gameDrawer.fillRect(position.add(new Vector2D(-size.x / 2, 0)),
-                new Point((int) (size.x / 2 - openedGap), size.y), new Color(7, 14, 7), 2);
+                new Point((int) (size.x / 2 - openedGap), size.y), DOORS_BORDER, 2);
 
 
-        gameDrawer.setColor(Color.ORANGE);
+        gameDrawer.setColor(DOORS_COLOR);
         gameDrawer.fillRect(position.add(new Vector2D(openedGap, 0)),
-                new Point((int) (size.x / 2 - openedGap), size.y), new Color(37, 21, 13), 2);
+                new Point((int) (size.x / 2 - openedGap), size.y), DOORS_BORDER, 2);
 
     }
 
@@ -54,7 +58,7 @@ public class ElevatorDoors extends Creature implements Drawable {
         DOORS_TIMER.tick(delta_time);
     }
 
-    public boolean isCLosed() {
+    public boolean isClosed() {
         return isCLosed && DOORS_TIMER.isReady();
     }
 }

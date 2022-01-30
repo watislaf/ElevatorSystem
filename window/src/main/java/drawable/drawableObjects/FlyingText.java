@@ -12,20 +12,21 @@ public class FlyingText extends MovingObject implements Drawable  {
     private final int FONT_SIZE;
     private final String TEXT;
     private final Timer TIMER;
-
+    private final Color TEXT_COLOR;
     public FlyingText(String TEXT, Vector2D position_start, Vector2D vector_to_fly,
-                      int font_size, double speed, long life_time) {
+                      int font_size, double speed, long life_time, Color textColor) {
         super(position_start, speed);
         this.FONT_SIZE = font_size;
         this.destination = position_start.add(vector_to_fly);
         this.TEXT = TEXT;
         TIMER = new Timer();
         TIMER.restart(life_time);
+        this.TEXT_COLOR = textColor;
     }
 
     @Override
     public void draw(GameDrawer gameDrawer) {
-        gameDrawer.setColor(Color.ORANGE);
+        gameDrawer.setColor(TEXT_COLOR);
 
         gameDrawer.setFont("TimesRoman", Font.PLAIN, FONT_SIZE );
         gameDrawer.drawString(TEXT, position);

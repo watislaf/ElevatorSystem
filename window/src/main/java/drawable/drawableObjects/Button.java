@@ -12,10 +12,15 @@ import java.awt.*;
 public class Button extends Creature implements Drawable {
     private final long BUTTON_ON_TIME = 500;
     Timer buttonOnTimer = new Timer();
-    Color color = Color.GREEN;
+    Color currentColor;
+    Color colorOn;
+    Color colorOff;
 
-    public Button(Vector2D position, Point size) {
+    public Button(Vector2D position, Point size, Color colorOn, Color colorOff) {
         super(position, size);
+        this.colorOn = colorOn;
+        this.colorOff = colorOff;
+        this.currentColor = colorOn;
     }
 
     public void buttonClick() {
@@ -24,7 +29,7 @@ public class Button extends Creature implements Drawable {
 
     @Override
     public void draw(GameDrawer gameDrawer) {
-        gameDrawer.setColor(color);
+        gameDrawer.setColor(currentColor);
         gameDrawer.fillRect(this);
     }
 
@@ -32,9 +37,9 @@ public class Button extends Creature implements Drawable {
     public void tick(long deltaTime) {
         buttonOnTimer.tick(deltaTime);
         if (buttonOnTimer.isReady()) {
-            color = Color.green;
+            currentColor = Color.green;
         } else {
-            color = Color.red;
+            currentColor = Color.red;
         }
     }
 }

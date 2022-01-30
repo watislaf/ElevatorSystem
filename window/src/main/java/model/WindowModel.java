@@ -2,7 +2,7 @@ package model;
 
 import connector.protocol.ApplicationCreatures;
 import connector.protocol.ApplicationSettings;
-import drawable.ColorsAndSizeSetting;
+import drawable.ColorSettings;
 import drawable.Drawable;
 import drawable.drawableObjects.*;
 import drawable.drawableObjects.Button;
@@ -20,7 +20,7 @@ import java.util.LinkedList;
 public class WindowModel {
     @Setter
     @Getter
-    private ColorsAndSizeSetting colorsAndSizeSetting;
+    private ColorSettings colorSettings;
 
     @Getter
     private ApplicationSettings settings;
@@ -43,7 +43,10 @@ public class WindowModel {
                     if (elevators.stream()
                             .noneMatch(creatureB -> creatureA.getId() == creatureB.getId())
                     ) {
-                        elevators.add(new DrawableElevator(creatureA, settings.ELEVATOR_OPEN_CLOSE_TIME));
+                        elevators.add(
+                                new DrawableElevator(creatureA, settings.ELEVATOR_OPEN_CLOSE_TIME,
+                                        colorSettings.ELEVATOR_BACKGROUND_COLOR, colorSettings.DOORS_COLOR,
+                                        colorSettings.BORDER_COLOR));
                     }
                 }
         );
@@ -53,7 +56,7 @@ public class WindowModel {
                     if (customers.stream()
                             .noneMatch(creatureB -> creatureA.getId() == creatureB.getId())
                     ) {
-                        customers.add(new DrawableCustomer(creatureA));
+                        customers.add(new DrawableCustomer(creatureA, colorSettings.CUSTOMER_SKIN_COLOR));
                     }
                 }
         );
@@ -74,21 +77,24 @@ public class WindowModel {
             hidingWall.add(new HidingWall(
                     new Vector2D(settings.BUILDING_SIZE.x / 2, wallSize * i + settings.ELEVATOR_SIZE.y),
                     new Point(settings.BUILDING_SIZE.x, (wallSize - settings.ELEVATOR_SIZE.y)),
-                    colorsAndSizeSetting.WALL_COLOR
+                    colorSettings.WALL_COLOR
             ));
             for (int j = 0; j < settings.ELEVATORS_COUNT; j++) {
-                buttons.add(new Button(
-                        new Vector2D(distanceBetweenElevators * (j + 1) + settings.BUTTON_RELATIVE_POSITION,
-                                i * wallSize + settings.ELEVATOR_SIZE.y / 2. + 5),
-                        new Point(4, 4)));
+                buttons.add(
+                        new Button(
+                                new Vector2D(
+                                        distanceBetweenElevators * (j + 1) + settings.BUTTON_RELATIVE_POSITION,
+                                        i * wallSize + settings.CUSTOMER_SIZE.y + 4),
+                                new Point(5, 5),
+                                colorSettings.BUTTON_ON_COLOR, colorSettings.BUTTON_OF_COLOR));
                 border.add(new ElevatorBorder(
                         new Vector2D(distanceBetweenElevators * (j + 1), i * wallSize),
                         elevators.get(j),
-                        wallSize));
+                        wallSize, colorSettings.BORDER_COLOR, colorSettings.NUMBER_COLOR));
 
                 blackSpaces.add(new BlackSpace(
                         new Vector2D(distanceBetweenElevators * (j + 1), i * wallSize),
-                        elevators.get(j)));
+                        elevators.get(j), colorSettings.BLACK_SPACE_COLOR, border.get(0).BORDER_SIZE));
             }
         }
     }
