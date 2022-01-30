@@ -8,7 +8,7 @@ import java.net.Socket;
 
 @AllArgsConstructor
 public class DataClient {
-    final OutputStream STREAM;
+    final ObjectOutputStream STREAM;
     final Socket SOCKET;
 
     public boolean isClosed() {

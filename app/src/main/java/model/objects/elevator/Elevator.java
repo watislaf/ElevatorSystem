@@ -208,7 +208,7 @@ public class Elevator extends MovingObject {
     }
 
     private double getTimeToGetTo(int requestFloor) {
-        return Math.abs(getPositionForFloor(requestFloor) - position.y) * SPEED_COEFFICIENT / speed;
+        return Math.abs(getPositionForFloor(requestFloor) - position.y) * SPEED_COEFFICIENT / getSpeed();
     }
 
     public int getBooking() {

@@ -16,9 +16,8 @@ class SwingPanel extends JPanel {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
+
 //        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-
         if (!VIEW_MODEL.isInitialised()) {
             return;
         }
@@ -34,6 +33,9 @@ class SwingPanel extends JPanel {
         drawWall(gameDrawer);
         VIEW_MODEL.getDrawableOjects().forEach(drawable -> drawable.draw(gameDrawer));
         drawBuilding(gameDrawer);
+
+        g2d.translate(-blackZone.x / 2, -blackZone.y / 2);
+
     }
 
     private void drawBuilding(GameDrawer gameDrawer) {

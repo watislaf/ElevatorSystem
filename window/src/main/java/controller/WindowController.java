@@ -24,8 +24,9 @@ public class WindowController implements OnSocketEvent {
     private final WindowModel windowMODEL;
     private long currentTime;
     SwingWindow gui;
+    int lastFloorButtonClicked = -1;
     static private final int TPS = 30;
-    LinkedList<ProtocolMessage> messages = new LinkedList<ProtocolMessage>();
+    LinkedList<ProtocolMessage> messages = new LinkedList<>();
 
     public WindowController(WindowModel windowModel) {
         windowMODEL = windowModel;
@@ -50,7 +51,7 @@ public class WindowController implements OnSocketEvent {
 
     public void start() throws InterruptedException {
         gui = new SwingWindow();
-        gui.startWindow(windowMODEL);
+        gui.startWindow(windowMODEL, this);
         long lastTime = System.currentTimeMillis();
 
         while (true) {
@@ -66,8 +67,12 @@ public class WindowController implements OnSocketEvent {
             currentTime += deltaTime;
 
             if (windowMODEL.isInitialised()) {
+                if (!gui.resized()) {
+                    gui.updateButtonsAndSliders(windowMODEL);
+                }
                 windowMODEL.getDrawableOjects().forEach(object -> object.tick(deltaTime));
                 windowMODEL.clearDead();
+                gui.updateButtonsAndSliders(windowMODEL);
             }
             gui.repaint();
         }
@@ -76,7 +81,6 @@ public class WindowController implements OnSocketEvent {
     private void updateMessages() {
         synchronized (messages) {
             messages.removeIf(this::processMessage);
-
         }
     }
 
@@ -91,6 +95,7 @@ public class WindowController implements OnSocketEvent {
                 ApplicationSettings settings = (ApplicationSettings) message.data();
                 windowMODEL.setSettings(settings);
                 currentTime = message.timeStump();
+
             }
             case UPDATE_DATA -> {
                 windowMODEL.updateData((ApplicationCreatures) message.data());
@@ -115,5 +120,20 @@ public class WindowController implements OnSocketEvent {
             }
         }
         return true;
+    }
+
+    public void clickedButtonWithNumber(int i) {
+        i = windowMODEL.getSettings().FLOORS_COUNT - i - 1;
+        if (lastFloorButtonClicked == -1) {
+            lastFloorButtonClicked = i;
+            return;
+        }
+        LinkedList<Integer> data = new LinkedList<>();
+        data.push(lastFloorButtonClicked);
+        data.push(i);
+
+        lastFloorButtonClicked = -1;
+
+        client.send(new ProtocolMessage(Protocol.CREATE_CUSTOMER, data, currentTime));
     }
 }

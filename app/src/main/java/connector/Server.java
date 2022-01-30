@@ -29,10 +29,9 @@ public class Server extends Thread {
 
     public void Send(DataClient client, ProtocolMessage message) {
         try {
-            new ObjectOutputStream(client.STREAM).writeObject(message);
+            client.STREAM.writeObject(message);
         } catch (IOException e) {
             System.out.println(e.toString());
-            System.out.println("XD");
         }
     }
 
@@ -42,9 +41,9 @@ public class Server extends Thread {
             System.out.println("Server is listening on port " + ConnectionSettings.PORT);
             while (true) {
                 Socket socket = serverSocket.accept();
-                var dataClient = new DataClient(socket.getOutputStream(), socket);
-                new StreamReader(socket, socket.getInputStream(), eventHandler).start();
+                var dataClient = new DataClient(new ObjectOutputStream(socket.getOutputStream()), socket);
                 connected.add(dataClient);
+                new StreamReader(socket, eventHandler).start();
                 eventHandler.onNewConnection(dataClient);
             }
         } catch (IOException ex) {

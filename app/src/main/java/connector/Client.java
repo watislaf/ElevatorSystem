@@ -14,7 +14,7 @@ public class Client {
         if (socket == null) {
             return true;
         }
-        return !socket.isConnected()||socket.isClosed()||socket.isOutputShutdown();
+        return !socket.isConnected() || socket.isClosed() || socket.isOutputShutdown();
     }
 
     public void send(ProtocolMessage message) {
@@ -35,7 +35,7 @@ public class Client {
                 outputStream = new ObjectOutputStream(socket.getOutputStream());
 
                 receivable.onNewConnection(new DataClient(outputStream, socket));
-                new StreamReader(socket, socket.getInputStream(), receivable).start();
+                new StreamReader(socket, receivable).start();
                 return;
             } catch (IOException e) {
                 System.out.println(e);

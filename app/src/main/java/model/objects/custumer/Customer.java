@@ -31,7 +31,13 @@ public class Customer extends MovingObject {
     @Override
     public void tick(long deltaTime) {
         if (currentElevator != null) {
-            position = currentElevator.getPosition();
+            if (currentElevator.isInMotion()) {
+                setVisible(false);
+                position.y = currentElevator.getPosition().y;
+            } else {
+                setCurrentFlor(currentElevator.getCurrentFloor());
+                setVisible(true);
+            }
         }
         super.tick(deltaTime);
     }
@@ -46,7 +52,4 @@ public class Customer extends MovingObject {
         return currentFlor < floorEnd;
     }
 
-    public void teleportToElevator() {
-        position.y = currentElevator.getPosition().y;
-    }
 }

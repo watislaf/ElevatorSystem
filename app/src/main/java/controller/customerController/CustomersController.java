@@ -1,7 +1,6 @@
 package controller.customerController;
 
 import connector.protocol.Protocol;
-import connector.protocol.ProtocolMessage;
 import controller.Controller;
 import controller.elevatorSystemController.ElevatorSystemController;
 import lombok.Getter;
@@ -11,7 +10,7 @@ import model.objects.custumer.Customer;
 import model.objects.custumer.CustomerState;
 import tools.Timer;
 
-import java.awt.*;
+
 import java.util.Random;
 
 public class CustomersController {
@@ -28,20 +27,13 @@ public class CustomersController {
 
     public void tick(long deltaTime) {
         timer.tick(deltaTime);
-        if (CONTROLLER.MODEL.getCustomers().size() < 2) {
-            int startFloor = new Random().nextInt(0, elevatorSystemController.SETTINGS.FLOORS_COUNT);
-            int endFloor = new Random().nextInt(0, elevatorSystemController.SETTINGS.FLOORS_COUNT);
-            endFloor += startFloor % 5;
-            CreateCustomer(startFloor,
-                    endFloor, SETTINGS.CUSTOMER_SIZE,
-                    new Random()
-                            .doubles(
-                                    SETTINGS.CUSTOMER_SPEED
-                                            - SETTINGS.CUSTOMER_SPEED / 4,
-                                    SETTINGS.CUSTOMER_SPEED
-                                            + SETTINGS.CUSTOMER_SPEED / 4)
-                            .findAny()
-                            .getAsDouble());
+        if (CONTROLLER.MODEL.getCustomers().size() < elevatorSystemController.SETTINGS.ELEVATOR_COUNT * 2) {
+            var maxFloor = elevatorSystemController.SETTINGS.FLOORS_COUNT;
+            int startFloor = new Random().nextInt(0, maxFloor);
+            int endFloor = new Random().nextInt(0, maxFloor);
+            endFloor = (maxFloor + startFloor + endFloor - 1) % maxFloor;
+
+            CreateCustomer(startFloor, endFloor);
         }
 
         for (var customer : CONTROLLER.MODEL.getCustomers()) {
@@ -70,15 +62,6 @@ public class CustomersController {
     }
 
     private void processStayIn(Customer customer) {
-        if (customer.getCurrentElevator().isInMotion()) {
-            customer.setVisible(false);
-        } else {
-            if (!customer.isVisible()) {
-                customer.teleportToElevator();
-            }
-            customer.setVisible(true);
-            customer.setCurrentFlor(customer.getCurrentElevator().getCurrentFloor());
-        }
         if (customer.getCurrentElevator().isOpened()) {
             if (customer.getCurrentFlor() == customer.getFloorEnd()) {
                 customer.setState(CustomerState.GET_OUT);
@@ -94,8 +77,10 @@ public class CustomersController {
                 .getClosestOpenedElevatorOnFloor(customer.getPosition(), customer.getCurrentFlor());
         if (closestOpenedElevator == null) {
             customer.setState(CustomerState.GO_TO_BUTTON);
-            customer.setSpeed(SETTINGS.CUSTOMER_SPEED);
+            customer.setSpeedMultiPly(1);
             return;
+        } else {
+            customer.setDestination(closestOpenedElevator.getPosition());
         }
         if (customer.isReachedDestination()) {
             elevatorSystemController.getIntoElevator(closestOpenedElevator);
@@ -104,13 +89,13 @@ public class CustomersController {
             customer.setDestination(
                     customer.getPosition().add(
                             new Vector2D(new Random()
-                                    .doubles(-customer.getSize().x / 2.,
-                                            customer.getSize().x / 2.)
+                                    .doubles(-customer.getSize().x / 2,
+                                            customer.getSize().x / 2)
                                     .findAny().getAsDouble()
                                     , 0)));
             customer.setState(CustomerState.STAY_IN);
             elevatorSystemController.setFloorToReach(customer.getCurrentElevator(), customer.getFloorEnd());
-            customer.setSpeed(SETTINGS.CUSTOMER_SPEED);
+            customer.setSpeedMultiPly(1);
 
         }
     }
@@ -121,13 +106,13 @@ public class CustomersController {
         if (nearestOpenedElevatorOnFloor != null) {
             customer.setDestination(nearestOpenedElevatorOnFloor.getPosition());
             customer.setState(CustomerState.GET_IN);
-            customer.setSpeed(SETTINGS.CUSTOMER_SPEED * 1.4);
-        } else {
-            if (timer.isReady()) {
-                customer.setDestination(new Vector2D(new Random().nextInt(0, elevatorSystemController.SETTINGS.BUILDING_SIZE.x),
-                        customer.getPosition().y));
-                timer.restart(3000);
-            }
+            customer.setSpeedMultiPly(1.5);
+            return;
+        }
+        if (timer.isReady()) {
+            customer.setDestination(new Vector2D(new Random().nextInt(0, elevatorSystemController.SETTINGS.BUILDING_SIZE.x),
+                    customer.getPosition().y));
+            timer.restart(3000);
         }
     }
 
@@ -142,16 +127,24 @@ public class CustomersController {
             elevatorSystemController.buttonClick(
                     new ElevatorRequest(customer.getPosition(), customer.wantsGoUp()));
             customer.setState(CustomerState.WAIT_UNTIL_ARRIVED);
-            timer.restart(1000);
-            customer.setSpeed(SETTINGS.CUSTOMER_SPEED * 0.5);
+            timer.restart(500);
+            customer.setSpeedMultiPly(0.5);
         }
     }
 
-    private void CreateCustomer(int floorStart, int floorEnd, Point customer_size, double speed) {
+    public void CreateCustomer(int floorStart, int floorEnd) {
+        double speed = new Random().doubles(
+                        SETTINGS.CUSTOMER_SPEED
+                                - SETTINGS.CUSTOMER_SPEED / 3,
+                        SETTINGS.CUSTOMER_SPEED
+                                + SETTINGS.CUSTOMER_SPEED / 3)
+                .findAny()
+                .getAsDouble();
+
         var startPosition = getStartPositionFOrmCustomer(floorStart);
         var customer = new Customer(
                 floorStart, floorEnd, startPosition, speed,
-                customer_size);
+                SETTINGS.CUSTOMER_SIZE);
 
         customer.setState(CustomerState.GO_TO_BUTTON);
 

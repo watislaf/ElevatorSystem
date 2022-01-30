@@ -15,10 +15,11 @@ public class DrawableCustomer extends Creature implements Drawable {
 
     @Getter
     @Setter
-    private   double serverRespondTime = 1;
-    public DrawableCustomer(Creature creature, Color color) {
+    private double serverRespondTime = 1;
+
+    public DrawableCustomer(Creature creature, Color[] color) {
         super(creature);
-        this.color = color;
+        this.color = color[(int) (getId() % color.length)];
         interpolationPosition = new Vector2D(creature.getPosition());
     }
 
@@ -38,7 +39,7 @@ public class DrawableCustomer extends Creature implements Drawable {
 
     @Override
     public void tick(long deltaTime) {
-        if(!isVisible()){
+        if (!isVisible()) {
             interpolationPosition = position;
             return;
         }

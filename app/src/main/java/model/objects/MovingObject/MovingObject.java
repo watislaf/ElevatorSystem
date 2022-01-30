@@ -9,9 +9,15 @@ import java.awt.*;
 public class MovingObject extends Creature {
     protected static final int SPEED_COEFFICIENT = 1000;
 
+    public double getSpeed() {
+        return speed * speedMultiPly;
+    }
+
+    private double speed;
     @Getter
     @Setter
-    protected  double speed;
+    protected double speedMultiPly = 1;
+
     @Getter
     @Setter
     protected boolean isDead = false;
@@ -35,7 +41,7 @@ public class MovingObject extends Creature {
         if (isReachedDestination()) {
             return;
         }
-        position = position.trendTo(destination,delta_time*speed/SPEED_COEFFICIENT);
+        position = position.trendTo(destination, delta_time * speed / SPEED_COEFFICIENT);
     }
 
     public boolean isReachedDestination() {

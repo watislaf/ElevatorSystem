@@ -24,6 +24,7 @@ public class WindowModel {
 
     @Getter
     private ApplicationSettings settings;
+
     LinkedList<DrawableElevator> elevators;
     LinkedList<DrawableCustomer> customers;
 
