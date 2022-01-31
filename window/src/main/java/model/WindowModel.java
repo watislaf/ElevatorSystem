@@ -15,6 +15,7 @@ import model.objects.MovingObject.Vector2D;
 import java.awt.*;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 public class WindowModel {
@@ -61,7 +62,7 @@ public class WindowModel {
                     }
                 }
         );
-        if (border == null) {
+        if (!isInitialised()) {
             initialiseFirstData();
         }
     }
@@ -147,8 +148,11 @@ public class WindowModel {
     }
 
     public DrawableElevator getElevator(long id) {
-        return elevators.stream().filter(elevator -> elevator.getId() == id).findFirst().get();
+        AtomicReference<DrawableElevator> tmp = new AtomicReference<>();
+          elevators.stream().filter(elevator -> elevator.getId() == id).findFirst().ifPresent(tmp::set);
+          return tmp.get();
     }
+
 
     public void setSettings(SettingsData settings) {
         this.settings = settings;
@@ -180,5 +184,9 @@ public class WindowModel {
 
     public boolean isInitialised() {
         return border != null;
+    }
+
+    public void clear() {
+        border = null;
     }
 }

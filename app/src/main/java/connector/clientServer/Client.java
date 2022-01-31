@@ -23,9 +23,6 @@ public class Client {
     private Socket serversSocket;
 
     public void reconect() throws InterruptedException {
-        if (!isClosed()) {
-            return;
-        }
         while (true) {
             try {
                 serversSocket = new Socket(ConnectionSettings.HOST, ConnectionSettings.PORT);
@@ -47,7 +44,7 @@ public class Client {
         }
     }
 
-    private boolean isClosed() {
+    public boolean isClosed() {
         if (serversSocket == null) {
             return true;
         }

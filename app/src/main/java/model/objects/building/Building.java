@@ -69,7 +69,8 @@ public class Building {
     }
 
     private boolean isOpenedElevatorOnFloorExist(int floor) {
-        return ELEVATORS.stream().anyMatch(elevator -> elevator.getCurrentFloor() == floor && elevator.isOpened());
+        return ELEVATORS.stream().anyMatch(elevator -> elevator.getCurrentFloor() == floor && elevator.isOpened() &&
+                elevator.isFree());
     }
 }
 

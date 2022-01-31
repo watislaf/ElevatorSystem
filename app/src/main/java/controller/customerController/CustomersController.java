@@ -103,8 +103,8 @@ public class CustomersController {
             var makeSpaceInElevator = ELEVATOR_SYSTEM_CONTROLLER.SETTINGS.ELEVATOR_SIZE.x / 2;
             var newDestination = new Vector2D(
                     new Random().nextDouble(
-                            -makeSpaceInElevator - customer.getSize().x / 2.,
-                            makeSpaceInElevator - customer.getSize().x / 2. - 3), 0);
+                            -makeSpaceInElevator - customer.getSize().x / 4.,
+                            makeSpaceInElevator - customer.getSize().x / 2. - 8 ), 0);
             ELEVATOR_SYSTEM_CONTROLLER.setFloorToReach(customer.getCurrentElevator(), customer.getFLOOR_TO_END());
             customer.setDestination(customer.getPosition().add(newDestination));
             customer.setState(CustomerState.STAY_IN);

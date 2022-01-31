@@ -77,7 +77,11 @@ public class WindowController implements SocketEventListener {
     }
 
     private void clientConnectReadWrite() throws InterruptedException {
-        client.reconect();
+
+        if (client.isClosed()) {
+            WINDOW_MODEL.clear();
+            client.reconect();
+        }
         synchronized (MESSAGE) {
             MESSAGE.removeIf(this::processMessage);
         }

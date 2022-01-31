@@ -77,6 +77,10 @@ public class Elevator extends MovingObject {
         return currentBookedCount + currentCustomersCount <= this.MAX_HUMAN_CAPACITY;
     }
 
+    public boolean isFree() {
+        return currentCustomersCount <= this.MAX_HUMAN_CAPACITY;
+    }
+
     public Elevator(Vector2D position, ElevatorSystemSettings settings, double wall_size) {
         super(position, settings.ELEVATOR_SPEED, settings.ELEVATOR_SIZE);
         this.TIME_TO_STOP_ON_FLOOR = settings.ELEVATOR_OPEN_CLOSE_TIME * 2 +
