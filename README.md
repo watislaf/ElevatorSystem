@@ -1,7 +1,7 @@
 # Elevator System
 
-This project simulate elevators in building. The project is divided into two parts, Server part that manipulate objects
-and Client part that draw it in real time.
+This project simulates elevators in a building. The project is divided into two parts, the Server part that manipulates objects
+and the Client part that draws them in real time. 
 
 Github actions and docker was used to atomatically deploy the project to the server.
 
