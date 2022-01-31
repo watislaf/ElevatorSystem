@@ -7,36 +7,28 @@ import model.objects.MovingObject.Vector2D;
 import java.util.LinkedList;
 import java.util.Random;
 
-
 public class Building {
+    public final LinkedList<Elevator> ELEVATORS = new LinkedList<>();
     public final ElevatorSystemSettings SETTINGS;
     public final double WALL_SIZE;
-
-    public final LinkedList<Elevator> ELEVATORS;
 
     public Building(ElevatorSystemSettings settings) {
         this.SETTINGS = settings;
         this.WALL_SIZE = ((double) settings.BUILDING_SIZE.y) / settings.FLOORS_COUNT;
-        this.ELEVATORS = new LinkedList<>();
 
         double distanceBetweenElevators = ((double) settings.BUILDING_SIZE.x) / (settings.ELEVATOR_COUNT + 1);
         for (int i = 0; i < settings.ELEVATOR_COUNT; i++) {
-            ELEVATORS.add(new Elevator(
-                    new Vector2D(distanceBetweenElevators * (i + 1), 0),
-                    settings, this.WALL_SIZE));
+            ELEVATORS.add(new Elevator(new Vector2D(distanceBetweenElevators * (i + 1), 0), settings,
+                    this.WALL_SIZE));
         }
     }
 
     public Vector2D getStartPositionAfterBuilding(int floorStart) {
-        boolean leftCorner = new Random().nextBoolean();
-        if (leftCorner) {
-            return new Vector2D(0,
-                    (int) (floorStart * WALL_SIZE));
-        } else {
-            return new Vector2D(
-                    SETTINGS.BUILDING_SIZE.x,
-                    (int) (floorStart * WALL_SIZE));
+        boolean spawnInLeftCorner = new Random().nextBoolean();
+        if (spawnInLeftCorner) {
+            return new Vector2D(0, (int) (floorStart * WALL_SIZE));
         }
+        return new Vector2D(SETTINGS.BUILDING_SIZE.x, (int) (floorStart * WALL_SIZE));
     }
 
     public Vector2D getClosestButtonOnFloor(Vector2D position, int floorStart) {
@@ -79,7 +71,6 @@ public class Building {
     private boolean isOpenedElevatorOnFloorExist(int floor) {
         return ELEVATORS.stream().anyMatch(elevator -> elevator.getCurrentFloor() == floor && elevator.isOpened());
     }
-
 }
 
 

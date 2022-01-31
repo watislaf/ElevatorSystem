@@ -1,6 +1,6 @@
 package controller;
 
-import connector.Server;
+import connector.clientServer.Server;
 import model.Model;
 
 public class Main {
@@ -11,8 +11,7 @@ public class Main {
         controller.setServer(server);
         try {
             controller.start();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        } catch (InterruptedException ignored) {
         }
     }
 }

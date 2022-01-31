@@ -1,41 +1,39 @@
 package controller.elevatorSystemController;
 
-import connector.protocol.Protocol;
-import connector.protocol.ProtocolMessage;
-import controller.Controller;
-import model.Model;
-import model.objects.building.Building;
-import model.objects.elevator.Elevator;
 import model.objects.elevator.ElevatorRequest;
 import model.objects.elevator.ElevatorState;
-import tools.Timer;
+import model.objects.building.Building;
+import model.objects.elevator.Elevator;
+import connector.protocol.Protocol;
+import controller.Controller;
+import model.Model;
 
-import java.util.LinkedList;
 import java.util.stream.Collectors;
+import java.util.LinkedList;
 
 
+/**
+ * Manipulate all elevators in game.
+ *
+ * @see ElevatorSystemSettings
+ */
 public class ElevatorSystemController {
-    private final Model MODEL;
-    private final Controller CONTROLLER;
     public final ElevatorSystemSettings SETTINGS = new ElevatorSystemSettings();
 
-    LinkedList<ElevatorRequest> pending = new LinkedList<>();
-
-    private final Timer timer = new Timer();
-
+    private final LinkedList<ElevatorRequest> PENDING_ELEVATOR_REQUESTS = new LinkedList<>();
     private final Building DEFAULT_BUILDING = new Building(SETTINGS);
+    private final Controller CONTROLLER;
+    private final Model MODEL;
 
     public ElevatorSystemController(Controller controller) {
-        CONTROLLER = controller;
+        this.CONTROLLER = controller;
         this.MODEL = CONTROLLER.MODEL;
         MODEL.Initialize(DEFAULT_BUILDING);
     }
 
-
     public void tick(long deltaTime) {
-        pending.removeIf(this::tryToCallElevator);
+        PENDING_ELEVATOR_REQUESTS.removeIf(this::tryToCallElevator);
         for (var elevator : MODEL.getBuilding().ELEVATORS) {
-            timer.tick(deltaTime);
             switch (elevator.getState()) {
                 case WAIT -> processWait(elevator);
                 case IN_MOTION -> processInMotion(elevator);
@@ -46,74 +44,84 @@ public class ElevatorSystemController {
         }
     }
 
-
-    private void processOpened(Elevator elevator) {
-        if (timer.isReady()) {
-            elevator.setState(ElevatorState.CLOSING);
-            timer.restart(SETTINGS.ELEVATOR_OPEN_CLOSE_TIME);
-            CONTROLLER.Send(Protocol.ELEVATOR_CLOSE, elevator.getId());
+    public void buttonClick(ElevatorRequest request) {
+        CONTROLLER.Send(Protocol.ELEVATOR_BUTTON_CLICK, request.button_position());
+        if (!tryToCallElevator(request)) {
+            PENDING_ELEVATOR_REQUESTS.add(request);
         }
     }
 
-    private void processOpeningClosing(Elevator elevator) {
-        if (timer.isReady()) {
-            if (elevator.getState() == ElevatorState.OPENING) {
-                elevator.setState(ElevatorState.OPENED);
-                timer.restart(SETTINGS.ELEVATOR_WAIT_AS_OPENED_TIME);
-                elevator.arrived();
-            }
-            if (elevator.getState() == ElevatorState.CLOSING) {
-                elevator.setState(ElevatorState.WAIT);
-                timer.restart(SETTINGS.ELEVATOR_AFTER_CLOSE_AFK_TIME);
-            }
-
-        }
+    public void getCustomerIntoElevator(Elevator nearestOpenedElevator) {
+        nearestOpenedElevator.put();
     }
 
-    private void processInMotion(Elevator elevator) {
-        if (elevator.isReachedDestination()) {
-            elevator.setState(ElevatorState.OPENING);
-            CONTROLLER.Send(Protocol.ELEVATOR_OPEN, elevator.getId());
-            timer.restart(SETTINGS.ELEVATOR_OPEN_CLOSE_TIME);
-        }
+    public void getOutFromElevator(Elevator currentElevator) {
+        currentElevator.remove();
+    }
+
+    public void setFloorToReach(Elevator currentElevator, int floorEnd) {
+        currentElevator.addFloorToThrowOut(floorEnd);
+        currentElevator.findBestFloor();
     }
 
     private void processWait(Elevator elevator) {
-        if (!timer.isReady()) {
+        if (!elevator.TIMER.isReady()) {
             return;
         }
         int bestFloor = elevator.findBestFloor();
-        if (bestFloor != elevator.UNEXIST_FLOOR) {
+        if (bestFloor != Elevator.UNEXISTING_FLOOR) {
             elevator.setFloorDestination(bestFloor);
             elevator.setState(ElevatorState.IN_MOTION);
         }
     }
 
-    public void buttonClick(ElevatorRequest request) {
-        CONTROLLER.Send(Protocol.ELEVATOR_BUTTON_CLICK, request.button_position());
-        if (!tryToCallElevator(request)) {
-            pending.add(request);
+    private void processInMotion(Elevator elevator) {
+        if (elevator.isReachedDestination()) {
+            CONTROLLER.Send(Protocol.ELEVATOR_OPEN, elevator.getId());
+            elevator.TIMER.restart(SETTINGS.ELEVATOR_OPEN_CLOSE_TIME);
+            elevator.setState(ElevatorState.OPENING);
         }
+    }
+
+    private void processOpeningClosing(Elevator elevator) {
+        if (!elevator.TIMER.isReady()) {
+            return;
+        }
+        if (elevator.getState() == ElevatorState.OPENING) {
+            elevator.TIMER.restart(SETTINGS.ELEVATOR_WAIT_AS_OPENED_TIME);
+            elevator.setState(ElevatorState.OPENED);
+            elevator.arrived();
+        }
+        if (elevator.getState() == ElevatorState.CLOSING) {
+            elevator.TIMER.restart(SETTINGS.ELEVATOR_AFTER_CLOSE_AFK_TIME);
+            elevator.setState(ElevatorState.WAIT);
+        }
+    }
+
+    private void processOpened(Elevator elevator) {
+        if (!elevator.TIMER.isReady()) {
+            return;
+        }
+        elevator.TIMER.restart(SETTINGS.ELEVATOR_OPEN_CLOSE_TIME);
+        CONTROLLER.Send(Protocol.ELEVATOR_CLOSE, elevator.getId());
+        elevator.setState(ElevatorState.CLOSING);
     }
 
     private boolean tryToCallElevator(ElevatorRequest request) {
         // closest, free, and go the same way / or wait
-        LinkedList<Elevator> elevators_available = MODEL.getBuilding().ELEVATORS.stream()
+        LinkedList<Elevator> elevatorsAvailable = MODEL.getBuilding().ELEVATORS.stream()
                 .filter(Elevator::isAvailable)
                 .collect(Collectors.toCollection(LinkedList::new));
-
-        if (elevators_available.size() == 0) {
+        if (elevatorsAvailable.size() == 0) {
             return false;
         }
-        Elevator closest_elevator = elevators_available.stream()
-                .reduce(
-                        null,
-                        (elevatorA, elevatorB) -> this.closestElevator(request, elevatorA, elevatorB)
-                );
+
+        Elevator closestElevator = elevatorsAvailable.stream()
+                .reduce(null, (elevatorA, elevatorB) -> this.closestElevator(request, elevatorA, elevatorB));
 
         var requestFloor = (int) Math.round(request.button_position().y / DEFAULT_BUILDING.WALL_SIZE);
-        closest_elevator.addFloorToPickUp(requestFloor);
-        closest_elevator.findBestFloor();
+        closestElevator.addFloorToPickUp(requestFloor);
+        closestElevator.findBestFloor();
         return true;
     }
 
@@ -126,12 +134,12 @@ public class ElevatorSystemController {
         }
 
         var requestFloor = (int) Math.round(request.button_position().y / DEFAULT_BUILDING.WALL_SIZE);
-        double timeToBeA = elevatorA.getTimeToBeeHere(requestFloor);
-        double timeToBeB = elevatorB.getTimeToBeeHere(requestFloor);
-        if (timeToBeA > timeToBeB) {
+        double timeToBeForElevatorA = elevatorA.getTimeToBeHere(requestFloor);
+        double timeToBeForElevatorB = elevatorB.getTimeToBeHere(requestFloor);
+        if (timeToBeForElevatorA > timeToBeForElevatorB) {
             return elevatorB;
         }
-        if (timeToBeA < timeToBeB) {
+        if (timeToBeForElevatorA < timeToBeForElevatorB) {
             return elevatorA;
         }
         if (request.button_position().getNearest(elevatorA.getPosition(), elevatorB.getPosition())
@@ -141,17 +149,4 @@ public class ElevatorSystemController {
         return elevatorB;
     }
 
-    public void getIntoElevator(Elevator nearestOpenedElevator) {
-
-        nearestOpenedElevator.put();
-    }
-
-    public void getOutFromElevator(Elevator currentElevator) {
-        currentElevator.remove();
-    }
-
-    public void setFloorToReach(Elevator currentElevator, int floorEnd) {
-        currentElevator.addFloorToThrowOut(floorEnd);
-        currentElevator.findBestFloor();
-    }
 }

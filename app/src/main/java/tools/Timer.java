@@ -1,7 +1,6 @@
 package tools;
 
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 
 @NoArgsConstructor
 public class Timer {

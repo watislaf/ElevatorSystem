@@ -14,12 +14,12 @@ import java.util.LinkedList;
 public class SwingWindow {
     private ActionListener listener;
     private WindowController controller;
-    private LinkedList<JButton> buttons = new LinkedList<>();
     private SwingPanel startPanel;
-    final Point WINDOW_SIZE_ = new Point(800, 800);
+    final Point WINDOW_SIZE = new Point(800, 800);
+    private final LinkedList<JButton> BUTTONS = new LinkedList<>();
 
-    private JFrame frame_;
-    Dimension resize;
+    private JFrame frame;
+    private Dimension resize;
 
     public void startWindow(WindowModel windowModel, WindowController controller) {
         this.controller = controller;
@@ -33,7 +33,7 @@ public class SwingWindow {
             var start_button_ = new JButton("2");
             start_button_.setSize(55, 55);
             start_button_.addActionListener(listener);
-            start_button_.setBackground(windowModel.getColorSettings().JBUTTONS_COLOR);
+            start_button_.setBackground(windowModel.COLOR_SETTINGS.JBUTTONS_COLOR);
             start_button_.setFocusPainted(false);
             start_button_.setForeground(Color.white);
             start_button_.setVisible(false);
@@ -41,32 +41,31 @@ public class SwingWindow {
 
 
             startPanel.add(start_button_);
-            buttons.add(start_button_);
+            BUTTONS.add(start_button_);
         }
     }
 
     private void initializeWindow(WindowModel windowModel) {
         startPanel = new SwingPanel(windowModel);
-        startPanel.setBackground(Color.BLACK);
+        startPanel.setBackground(windowModel.COLOR_SETTINGS.BLACK_SPACE_COLOR);
         startPanel.setLayout(null);
 
-        frame_ = new JFrame("ELEVATOR SYS");
-        frame_.setSize(WINDOW_SIZE_.x, WINDOW_SIZE_.y);
-        frame_.setVisible(true);
-        frame_.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame_.add(startPanel);
+        frame = new JFrame("ELEVATOR SYS");
+        frame.setSize(WINDOW_SIZE.x, WINDOW_SIZE.y);
+        frame.setVisible(true);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.add(startPanel);
     }
 
 
     public void repaint() {
-        frame_.repaint();
+        frame.repaint();
     }
 
     public void updateButtonsAndSliders(WindowModel windowMODEL) {
-        Dimension realSize = startPanel.getSize();
-        resize = realSize;
-        Iterator<JButton> button = buttons.iterator();
-        double heightOfButton = (resize.height - 100) / windowMODEL.getSettings().FLOORS_COUNT;
+        resize = startPanel.getSize();
+        Iterator<JButton> button = BUTTONS.iterator();
+        double heightOfButton = (resize.height - 100.) / windowMODEL.getSettings().FLOORS_COUNT;
         for (int i = 0; i < 16; i++) {
             JButton currentButton = button.next();
             currentButton.setText("->");
@@ -80,7 +79,6 @@ public class SwingWindow {
                     new Rectangle(0, (int) heightOfButton * i + 50,
                             50, (int) heightOfButton));
 
-
         }
 
     }
@@ -93,7 +91,7 @@ public class SwingWindow {
     }
 
     public void clicked(JButton source) {
-        Iterator<JButton> button = buttons.iterator();
+        Iterator<JButton> button = BUTTONS.iterator();
         for (int i = 0; i < 16; i++) {
             JButton currentButton = button.next();
             if (currentButton == source) {

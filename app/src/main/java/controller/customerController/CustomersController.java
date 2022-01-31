@@ -1,45 +1,51 @@
 package controller.customerController;
 
-import connector.protocol.Protocol;
-import controller.Controller;
 import controller.elevatorSystemController.ElevatorSystemController;
-import lombok.Getter;
 import model.objects.elevator.ElevatorRequest;
+import model.objects.custumer.CustomerState;
 import model.objects.MovingObject.Vector2D;
 import model.objects.custumer.Customer;
-import model.objects.custumer.CustomerState;
-import tools.Timer;
-
+import connector.protocol.Protocol;
+import controller.Controller;
 
 import java.util.Random;
 
-public class CustomersController {
-    @Getter
-    public final CustomerSettings SETTINGS = new CustomerSettings();
-    private final ElevatorSystemController elevatorSystemController;
-    private final Controller CONTROLLER;
-    private Timer timer = new Timer();
+import tools.Timer;
 
-    public CustomersController(Controller CONTROLLER) {
-        this.elevatorSystemController = CONTROLLER.ELEVATOR_SYSTEM_CONTROLLER;
-        this.CONTROLLER = CONTROLLER;
+/**
+ * Manipulate all customers in game.
+ *
+ * @see CustomerSettings
+ */
+public class CustomersController {
+    public final CustomerSettings CUSTOMERS_SETTINGS = new CustomerSettings();
+
+    private final ElevatorSystemController ELEVATOR_SYSTEM_CONTROLLER;
+    private final Timer spawnTimer = new Timer();
+    private final Controller CONTROLLER;
+
+    public CustomersController(Controller controller) {
+        this.ELEVATOR_SYSTEM_CONTROLLER = controller.ELEVATOR_SYSTEM_CONTROLLER;
+        this.CONTROLLER = controller;
     }
 
     public void tick(long deltaTime) {
-        timer.tick(deltaTime);
-        if (CONTROLLER.MODEL.getCustomers().size() < elevatorSystemController.SETTINGS.ELEVATOR_COUNT * 2) {
-            var maxFloor = elevatorSystemController.SETTINGS.FLOORS_COUNT;
-            int startFloor = new Random().nextInt(0, maxFloor);
-            int endFloor = new Random().nextInt(0, maxFloor);
-            endFloor = (maxFloor + startFloor + endFloor - 1) % maxFloor;
+        spawnTimer.tick(deltaTime);
 
-            CreateCustomer(startFloor, endFloor);
+        if (spawnTimer.isReady() && CONTROLLER.MODEL.CUSTOMERS.size() < CUSTOMERS_SETTINGS.MAX_CUSTOMERS) {
+            var maxFloor = ELEVATOR_SYSTEM_CONTROLLER.SETTINGS.FLOORS_COUNT;
+            var randomStartFloor = new Random().nextInt(0, maxFloor);
+            var randomEndFloor = new Random().nextInt(0, maxFloor);
+            randomEndFloor = (maxFloor + randomStartFloor + randomEndFloor - 1) % maxFloor;
+            CreateCustomer(randomStartFloor, randomEndFloor);
+
+            spawnTimer.restart(CUSTOMERS_SETTINGS.SPAWN_RATE);
         }
 
-        for (var customer : CONTROLLER.MODEL.getCustomers()) {
+        for (var customer : CONTROLLER.MODEL.CUSTOMERS) {
             switch (customer.getState()) {
-                case GO_TO_BUTTON -> processGotOButton(customer);
-                case WAIT_UNTIL_ARRIVED -> processWaitUntillArrived(customer);
+                case GO_TO_BUTTON -> processGoToButton(customer);
+                case WAIT_UNTIL_ARRIVED -> processWaitUntilArrived(customer);
                 case GET_IN -> processGetIn(customer);
                 case STAY_IN -> processStayIn(customer);
                 case GET_OUT -> processGetOut(customer);
@@ -48,27 +54,34 @@ public class CustomersController {
         }
     }
 
-    private void processGetOut(Customer customer) {
-        if (!customer.isReachedDestination()) {
-            return;
-        }
-        if (customer.getPosition().x < -customer.getSize().x ||
-                customer.getPosition().x > elevatorSystemController.SETTINGS.BUILDING_SIZE.x + customer.getSize().x) {
-            customer.setDead(true);
-        } else {
-            CONTROLLER.Send(Protocol.CUSTOMER_GET_IN_OUT, customer.getId());
-            customer.setDestination(getStartPositionFOrmCustomer(customer.getCurrentFlor()));
+    private void processGoToButton(Customer customer) {
+        var buttonPosition = CONTROLLER.MODEL.getBuilding()
+                .getClosestButtonOnFloor(customer.getPosition(), customer.getCurrentFlor());
+        customer.setDestination(buttonPosition);
+        if (customer.isReachedDestination()) {
+            ELEVATOR_SYSTEM_CONTROLLER.buttonClick(new ElevatorRequest(customer.getPosition(), customer.wantsGoUp()));
+            customer.getTIMER().restart(CUSTOMERS_SETTINGS.TIME_TO_WAIT_AFTER_BUTTON_CLICK);
+            customer.setState(CustomerState.WAIT_UNTIL_ARRIVED);
+            customer.setSpeedMultiPly(CUSTOMERS_SETTINGS.SLOW_SPEED_MULTIPLY);
         }
     }
 
-    private void processStayIn(Customer customer) {
-        if (customer.getCurrentElevator().isOpened()) {
-            if (customer.getCurrentFlor() == customer.getFloorEnd()) {
-                customer.setState(CustomerState.GET_OUT);
-                elevatorSystemController.getOutFromElevator(customer.getCurrentElevator());
-                customer.setDestination(customer.getCurrentElevator().getPosition());
-                customer.setCurrentElevator(null);
-            }
+    private void processWaitUntilArrived(Customer customer) {
+        var nearestOpenedElevatorOnFloor = CONTROLLER.MODEL.getBuilding()
+                .getClosestOpenedElevatorOnFloor(customer.getPosition(), customer.getCurrentFlor());
+        if (nearestOpenedElevatorOnFloor != null) {
+            customer.setDestination(nearestOpenedElevatorOnFloor.getPosition());
+            customer.setSpeedMultiPly(CUSTOMERS_SETTINGS.FAST_SPEED_MULTIPLY);
+            customer.setState(CustomerState.GET_IN);
+            return;
+        }
+        if (customer.getTIMER().isReady()) {
+            var getPositionToWalk = new Vector2D(
+                    new Random().nextInt(0, ELEVATOR_SYSTEM_CONTROLLER.SETTINGS.BUILDING_SIZE.x),
+                    customer.getPosition().y);
+            customer.setSpeedMultiPly(CUSTOMERS_SETTINGS.SLOW_SPEED_MULTIPLY);
+            customer.getTIMER().restart(CUSTOMERS_SETTINGS.TIME_TO_WALK);
+            customer.setDestination(getPositionToWalk);
         }
     }
 
@@ -79,85 +92,72 @@ public class CustomersController {
             customer.setState(CustomerState.GO_TO_BUTTON);
             customer.setSpeedMultiPly(1);
             return;
-        } else {
-            customer.setDestination(closestOpenedElevator.getPosition());
         }
+        customer.setDestination(closestOpenedElevator.getPosition());
+
         if (customer.isReachedDestination()) {
-            elevatorSystemController.getIntoElevator(closestOpenedElevator);
+            ELEVATOR_SYSTEM_CONTROLLER.getCustomerIntoElevator(closestOpenedElevator);
             CONTROLLER.Send(Protocol.CUSTOMER_GET_IN_OUT, customer.getId());
             customer.setCurrentElevator(closestOpenedElevator);
-            customer.setDestination(
-                    customer.getPosition().add(
-                            new Vector2D(new Random()
-                                    .doubles(-customer.getSize().x / 2,
-                                            customer.getSize().x / 2)
-                                    .findAny().getAsDouble()
-                                    , 0)));
-            customer.setState(CustomerState.STAY_IN);
-            elevatorSystemController.setFloorToReach(customer.getCurrentElevator(), customer.getFloorEnd());
-            customer.setSpeedMultiPly(1);
 
+            var makeSpaceInElevator = ELEVATOR_SYSTEM_CONTROLLER.SETTINGS.ELEVATOR_SIZE.x / 2;
+            var newDestination = new Vector2D(
+                    new Random().nextDouble(
+                            -makeSpaceInElevator - customer.getSize().x / 2.,
+                            makeSpaceInElevator - customer.getSize().x / 2. - 3), 0);
+            ELEVATOR_SYSTEM_CONTROLLER.setFloorToReach(customer.getCurrentElevator(), customer.getFLOOR_TO_END());
+            customer.setDestination(customer.getPosition().add(newDestination));
+            customer.setState(CustomerState.STAY_IN);
+            customer.setSpeedMultiPly(1);
         }
     }
 
-    private void processWaitUntillArrived(Customer customer) {
-        var nearestOpenedElevatorOnFloor = CONTROLLER.MODEL.getBuilding()
-                .getClosestOpenedElevatorOnFloor(customer.getPosition(), customer.getCurrentFlor());
-        if (nearestOpenedElevatorOnFloor != null) {
-            customer.setDestination(nearestOpenedElevatorOnFloor.getPosition());
-            customer.setState(CustomerState.GET_IN);
-            customer.setSpeedMultiPly(1.5);
+    private void processStayIn(Customer customer) {
+        if (customer.getCurrentElevator().isOpened()) {
+            if (customer.getCurrentFlor() == customer.getFLOOR_TO_END()) {
+                ELEVATOR_SYSTEM_CONTROLLER.getOutFromElevator(customer.getCurrentElevator());
+                customer.setDestination(customer.getCurrentElevator().getPosition());
+                customer.setState(CustomerState.GET_OUT);
+                customer.setCurrentElevator(null);
+            }
+        }
+    }
+
+    private void processGetOut(Customer customer) {
+        if (!customer.isReachedDestination()) {
             return;
         }
-        if (timer.isReady()) {
-            customer.setDestination(new Vector2D(new Random().nextInt(0, elevatorSystemController.SETTINGS.BUILDING_SIZE.x),
-                    customer.getPosition().y));
-            timer.restart(3000);
+        if (customer.getPosition().x > ELEVATOR_SYSTEM_CONTROLLER.SETTINGS.BUILDING_SIZE.x + customer.getSize().x ||
+                customer.getPosition().x < -customer.getSize().x) {
+            customer.setDead(true);
+            return;
         }
-    }
-
-    private void processGotOButton(Customer customer) {
-        var buttonPosition = CONTROLLER.MODEL.getBuilding()
-                .getClosestButtonOnFloor(customer.getPosition(), customer.getCurrentFlor());
-        if (buttonPosition == null) {
-//            customer.setState(CustomerState.); // TODO add walking mehanick
-        }
-        customer.setDestination(buttonPosition);
-        if (customer.isReachedDestination()) {
-            elevatorSystemController.buttonClick(
-                    new ElevatorRequest(customer.getPosition(), customer.wantsGoUp()));
-            customer.setState(CustomerState.WAIT_UNTIL_ARRIVED);
-            timer.restart(500);
-            customer.setSpeedMultiPly(0.5);
-        }
+        customer.setDestination(getStartPositionForCustomer(customer.getCurrentFlor()));
+        CONTROLLER.Send(Protocol.CUSTOMER_GET_IN_OUT, customer.getId());
     }
 
     public void CreateCustomer(int floorStart, int floorEnd) {
-        double speed = new Random().doubles(
-                        SETTINGS.CUSTOMER_SPEED
-                                - SETTINGS.CUSTOMER_SPEED / 3,
-                        SETTINGS.CUSTOMER_SPEED
-                                + SETTINGS.CUSTOMER_SPEED / 3)
-                .findAny()
-                .getAsDouble();
+        double speed = new Random().nextDouble(
+                CUSTOMERS_SETTINGS.CUSTOMER_SPEED
+                        - CUSTOMERS_SETTINGS.CUSTOMER_SPEED / 3,
+                CUSTOMERS_SETTINGS.CUSTOMER_SPEED
+                        + CUSTOMERS_SETTINGS.CUSTOMER_SPEED / 3);
 
-        var startPosition = getStartPositionFOrmCustomer(floorStart);
-        var customer = new Customer(
-                floorStart, floorEnd, startPosition, speed,
-                SETTINGS.CUSTOMER_SIZE);
+        var startPosition = getStartPositionForCustomer(floorStart);
+        var customer = new Customer(floorStart, floorEnd, startPosition, speed,
+                CUSTOMERS_SETTINGS.CUSTOMER_SIZE);
 
         customer.setState(CustomerState.GO_TO_BUTTON);
-
-        CONTROLLER.MODEL.getCustomers().add(customer);
+        CONTROLLER.MODEL.CUSTOMERS.add(customer);
     }
 
-    private Vector2D getStartPositionFOrmCustomer(int floorStart) {
+    private Vector2D getStartPositionForCustomer(int floorStart) {
         Vector2D start_position = CONTROLLER.MODEL.getBuilding().getStartPositionAfterBuilding(floorStart);
         // So u can't see customer whet it spawns
         if (start_position.x == 0) {
-            start_position.x -= SETTINGS.CUSTOMER_SIZE.x * 2;
+            start_position.x -= CUSTOMERS_SETTINGS.CUSTOMER_SIZE.x * 2;
         } else {
-            start_position.x += SETTINGS.CUSTOMER_SIZE.x * 2;
+            start_position.x += CUSTOMERS_SETTINGS.CUSTOMER_SIZE.x * 2;
         }
         return start_position;
     }

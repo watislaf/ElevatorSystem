@@ -6,6 +6,9 @@ import java.awt.*;
 import java.awt.geom.Point2D;
 import java.io.Serializable;
 
+/*
+* Personal Point class with usefull methods
+ */
 @NoArgsConstructor
 public class Vector2D extends Point2D.Double implements Serializable {
     public static final double EPSILON = 0.0001;
@@ -56,10 +59,7 @@ public class Vector2D extends Point2D.Double implements Serializable {
     }
 
     public Vector2D sub(Vector2D vectorB) {
-        var tmp = new Vector2D(this);
-        tmp.x -= vectorB.x;
-        tmp.y -= vectorB.y;
-        return tmp;
+        return new Vector2D(x - vectorB.x, y + vectorB.y);
     }
 
     public Vector2D trendTo(Vector2D destination, double length) {

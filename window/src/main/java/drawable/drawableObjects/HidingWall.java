@@ -3,7 +3,7 @@ package drawable.drawableObjects;
 import drawable.Drawable;
 import model.objects.MovingObject.Creature;
 import model.objects.MovingObject.Vector2D;
-import tools.GameDrawer;
+import view.GameDrawer;
 
 import java.awt.*;
 
@@ -21,7 +21,7 @@ public class HidingWall extends Creature implements Drawable {
         gameDrawer.fillRect(this);
     }
 
-    public void tick(long delta_time){};
+    public void tick(long delta_time){}
 }
 
 

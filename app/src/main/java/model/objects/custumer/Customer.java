@@ -1,55 +1,47 @@
 package model.objects.custumer;
 
-import lombok.Setter;
 import model.objects.MovingObject.MovingObject;
-
-import java.awt.*;
-import java.util.Random;
-
-import lombok.Getter;
 import model.objects.MovingObject.Vector2D;
 import model.objects.elevator.Elevator;
+import lombok.Setter;
+import lombok.Getter;
+import tools.Timer;
+
+import java.awt.Point;
 
 
+@Getter
 public class Customer extends MovingObject {
-    @Getter
+    private final Timer TIMER = new Timer();
+    private final int FLOOR_TO_END;
     @Setter
-    private int currentFlor;
-    @Getter
-    private int floorEnd;
-    @Getter
+    private CustomerState state = CustomerState.GO_TO_BUTTON;
     @Setter
     private Elevator currentElevator;
-
-    public void setState(CustomerState state) {
-        this.state = state;
-    }
-
-    @Getter
-    private CustomerState state = CustomerState.GO_TO_BUTTON;
-
-    @Override
-    public void tick(long deltaTime) {
-        if (currentElevator != null) {
-            if (currentElevator.isInMotion()) {
-                setVisible(false);
-                position.y = currentElevator.getPosition().y;
-            } else {
-                setCurrentFlor(currentElevator.getCurrentFloor());
-                setVisible(true);
-            }
-        }
-        super.tick(deltaTime);
-    }
+    @Setter
+    private int currentFlor;
 
     public Customer(int currentFlor, int floorEnd, Vector2D position, double speed, Point size) {
         super(position, speed, size);
+        this.FLOOR_TO_END = floorEnd;
         this.currentFlor = currentFlor;
-        this.floorEnd = floorEnd;
+    }
+
+    @Override
+    public void tick(long deltaTime) {
+        TIMER.tick(deltaTime);
+        super.tick(deltaTime);
+
+        if (currentElevator != null && currentElevator.isInMotion()) {
+            position.y = currentElevator.getPosition().y;
+            setCurrentFlor(currentElevator.getCurrentFloor());
+            setVisible(false);
+            return;
+        }
+        setVisible(true);
     }
 
     public boolean wantsGoUp() {
-        return currentFlor < floorEnd;
+        return currentFlor < FLOOR_TO_END;
     }
-
 }

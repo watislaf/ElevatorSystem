@@ -1,35 +1,34 @@
 package model;
 
-import connector.protocol.ApplicationCreatures;
+import connector.protocol.CreaturesData;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import model.objects.MovingObject.Creature;
 import model.objects.MovingObject.MovingObject;
 import model.objects.building.Building;
 import model.objects.custumer.Customer;
 
-import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.List;
 
-@Getter
-@Setter
+/*
+* Class to store common objects
+ */
 @NoArgsConstructor
 public class Model {
-    private LinkedList<Customer> customers;
+    @Getter
+    @Setter
     private Building building;
+    public final LinkedList<Customer> CUSTOMERS = new LinkedList<>();
 
     public void Initialize(Building building) {
         this.building = building;
-        this.customers = new LinkedList<>();
     }
 
     public void clearDead() {
-        customers.removeIf(MovingObject::isDead);
+        CUSTOMERS.removeIf(MovingObject::isDead);
     }
 
-    public ApplicationCreatures getDataToSent() {
-        return new ApplicationCreatures(customers, building.ELEVATORS);
+    public CreaturesData getDataToSent() {
+        return new CreaturesData(CUSTOMERS, building.ELEVATORS);
     }
 }

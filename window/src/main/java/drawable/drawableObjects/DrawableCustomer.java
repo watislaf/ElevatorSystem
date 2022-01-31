@@ -2,38 +2,39 @@ package drawable.drawableObjects;
 
 import drawable.Drawable;
 
-import lombok.Getter;
-import lombok.Setter;
 import model.objects.MovingObject.Creature;
 import model.objects.MovingObject.Vector2D;
-import tools.GameDrawer;
+import view.GameDrawer;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.awt.*;
 
 public class DrawableCustomer extends Creature implements Drawable {
-    Vector2D interpolationPosition;
+    private final Color COLOR_OF_CUSTOMER;
 
     @Getter
     @Setter
-    private double serverRespondTime = 1;
+    private boolean behindElevator = true;
+    @Getter
+    @Setter
+    private double serverRespondTime;
+    private Vector2D interpolationPosition;
+
 
     public DrawableCustomer(Creature creature, Color[] color) {
         super(creature);
-        this.color = color[(int) (getId() % color.length)];
+        this.COLOR_OF_CUSTOMER = color[(int) (getId() % color.length)];
         interpolationPosition = new Vector2D(creature.getPosition());
     }
-
-    Color color;
-    @Getter
-    @Setter
-    boolean behindElevator = true;
 
     @Override
     public void draw(GameDrawer gameDrawer) {
         if (!isVisible()) {
+            behindElevator = false;
             return;
         }
-        gameDrawer.setColor(color);
+        gameDrawer.setColor(COLOR_OF_CUSTOMER);
         gameDrawer.fillRect(this.interpolationPosition, this.size, Color.DARK_GRAY, 2);
     }
 
@@ -43,10 +44,9 @@ public class DrawableCustomer extends Creature implements Drawable {
             interpolationPosition = position;
             return;
         }
-        interpolationPosition = interpolationPosition.trendTo(position,
-                position.getVectorTo(interpolationPosition).getLength()
+        interpolationPosition = interpolationPosition
+                .trendTo(position, position.getVectorTo(interpolationPosition).getLength()
                         * deltaTime / serverRespondTime);
-
     }
 
     public boolean isNotBehindElevator() {

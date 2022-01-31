@@ -6,45 +6,40 @@ import lombok.Setter;
 import java.awt.*;
 import java.io.Serializable;
 
+/*
+ * Basic object of all objects in project
+ */
+@Getter
 public class Creature implements Serializable {
-    static Integer next_id = 0;
+    private static Integer next_id = 0;
 
-    @Getter
-    long id;
-
-    @Getter
-    protected Vector2D position;
-    @Getter
     @Setter
-    boolean isVisible = true;
-
-    @Getter
+    protected boolean isVisible = true;
     protected Point size = new Point();
-
+    protected Vector2D position;
+    protected long id;
 
     public Creature(Creature creatureA) {
-        this.id = creatureA.id;
         this.position = new Vector2D(creatureA.position);
         this.size = new Point(creatureA.size);
         this.isVisible = creatureA.isVisible;
+        this.id = creatureA.id;
     }
 
     public Creature(Vector2D position) {
-        id = next_id++;
         this.position = position;
+        id = next_id++;
     }
 
     public Creature(Vector2D position, Point size) {
-        id = next_id++;
         this.position = position;
         this.size = size;
+        id = next_id++;
     }
 
     public void set(Creature creature) {
         this.position = creature.position;
-        this.size = creature.size;
         this.isVisible = creature.isVisible;
+        this.size = creature.size;
     }
-
-
 }

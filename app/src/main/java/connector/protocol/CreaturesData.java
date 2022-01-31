@@ -1,6 +1,6 @@
 package connector.protocol;
 
-import lombok.Data;
+import connector.clientServer.ConnectionSettings;
 import model.objects.MovingObject.Creature;
 import model.objects.custumer.Customer;
 import model.objects.elevator.Elevator;
@@ -14,15 +14,15 @@ import java.util.LinkedList;
  * <p>
  * This data is sending SSPS times at second
  *
- * @see connector.ConnectionSettings
+ * @see ConnectionSettings
  * </p>
  */
 
-public class ApplicationCreatures implements Serializable {
+public class CreaturesData implements Serializable {
     public final LinkedList<Creature> CUSTOMERS = new LinkedList<>();
     public final LinkedList<Creature> ELEVATORS = new LinkedList<>();
 
-    public ApplicationCreatures(LinkedList<Customer> customers, LinkedList<Elevator> elevators) {
+    public CreaturesData(LinkedList<Customer> customers, LinkedList<Elevator> elevators) {
         customers.forEach(customer -> this.CUSTOMERS.add(new Creature(customer)));
         elevators.forEach(elevator -> this.ELEVATORS.add(new Creature(elevator)));
     }

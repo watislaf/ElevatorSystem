@@ -1,18 +1,17 @@
 package drawable.drawableObjects;
 
-import drawable.Drawable;
 import model.objects.MovingObject.Creature;
 import model.objects.MovingObject.Vector2D;
-import tools.GameDrawer;
+import drawable.Drawable;
+import view.GameDrawer;
 import tools.Timer;
 
 import java.awt.*;
 
 public class ElevatorDoors extends Creature implements Drawable {
-
     private final long OPEN_CLOSE_DOORS_TIME;
-    private final Timer DOORS_TIMER = new Timer();
     private final DrawableElevator PARENT_ELEVATOR;
+    private final Timer DOORS_TIMER = new Timer();
 
     private boolean isCLosed = true;
     private final Color DOORS_COLOR;
@@ -26,7 +25,6 @@ public class ElevatorDoors extends Creature implements Drawable {
         this.DOORS_COLOR = doorsColor;
         this.DOORS_BORDER = doorsBorder;
     }
-
 
     public void changeDoorsState(boolean newState) {
         if (isCLosed == newState) {
@@ -42,12 +40,11 @@ public class ElevatorDoors extends Creature implements Drawable {
         if (!isCLosed) {
             percentage = 1 - percentage;
         }
-        Double openedGap = percentage * size.x / 2;
+        var openedGap = percentage * size.x / 2.;
 
         gameDrawer.setColor(DOORS_COLOR);
-        gameDrawer.fillRect(position.add(new Vector2D(-size.x / 2, 0)),
+        gameDrawer.fillRect(position.add(new Vector2D(-size.x / 2., 0)),
                 new Point((int) (size.x / 2 - openedGap), size.y), DOORS_BORDER, 2);
-
 
         gameDrawer.setColor(DOORS_COLOR);
         gameDrawer.fillRect(position.add(new Vector2D(openedGap, 0)),

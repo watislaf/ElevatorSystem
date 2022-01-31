@@ -5,86 +5,85 @@ import lombok.Getter;
 import lombok.Setter;
 import model.objects.MovingObject.MovingObject;
 import model.objects.MovingObject.Vector2D;
-import model.objects.custumer.Customer;
+import tools.Timer;
 
-import java.awt.*;
 import java.util.*;
 
+/*
+ * Elevator is store all requests under and behind his way, the algorithm find nearest by
+ * calculating distance to came from floor A to floor B and all intermediate floors
+ */
 public class Elevator extends MovingObject {
-    private final long TIME_TO_STOP_ON_FLOOR;
-    public final int UNEXIST_FLOOR = 999;
+    public static final int UNEXISTING_FLOOR = 999;
+    public final Timer TIMER = new Timer();
 
+    private final long TIME_TO_STOP_ON_FLOOR;
+    private final int MAX_HUMAN_CAPACITY;
     private final double WALL_SIZE;
-    private final Point BUILDING_SIZE;
+
     @Getter
     @Setter
     private ElevatorState state;
     private boolean isGoUp = false;
 
-    private final int MAX_HUMAN_CAPACITY;
-
     private int currentCustomersCount = 0;
     private int currentBookedCount = 0;
-    // Floor and how many people are waiting
-    private final TreeMap<Integer, Integer> PICK_UP_TOP = new TreeMap<>();
-    private final TreeSet<Integer> THROW_OUT_TOP = new TreeSet<>();
-    private final TreeMap<Integer, Integer> PICK_UP_BOTTOM = new TreeMap<>(Comparator.reverseOrder());
-    private final TreeSet<Integer> THROW_OUT_BOTTOM = new TreeSet<>();
 
-    private final LinkedList<Customer> CUSTOMERS_INSIDE = new LinkedList<>();
+    // how many people are waiting
+    private final TreeMap<Integer, Integer> PICK_UP_TOP = new TreeMap<>();
+    private final TreeMap<Integer, Integer> PICK_UP_BOTTOM = new TreeMap<>(Comparator.reverseOrder());
+    private final TreeSet<Integer> THROW_OUT_TOP = new TreeSet<>();
+    private final TreeSet<Integer> THROW_OUT_BOTTOM = new TreeSet<>();
 
     @Override
     public void tick(long deltaTime) {
         super.tick(deltaTime);
+        TIMER.tick(deltaTime);
     }
 
-
     public int findBestFloor() {
-        int floorToGetUp = UNEXIST_FLOOR;
+        int floorToGetUp = UNEXISTING_FLOOR;
         if (!PICK_UP_TOP.isEmpty()) {
             floorToGetUp = Math.min(PICK_UP_TOP.firstKey(), floorToGetUp);
         }
         if (!THROW_OUT_TOP.isEmpty()) {
             floorToGetUp = Math.min(THROW_OUT_TOP.first(), floorToGetUp);
         }
-        if (isGoUp && floorToGetUp != UNEXIST_FLOOR) {
+        if (isGoUp && floorToGetUp != UNEXISTING_FLOOR) {
             return floorToGetUp;
         }
-        int floorToGetDown = -UNEXIST_FLOOR;
+        int floorToGetDown = -UNEXISTING_FLOOR;
         if (!PICK_UP_BOTTOM.isEmpty()) {
             floorToGetDown = Math.max(PICK_UP_BOTTOM.firstKey(), floorToGetDown);
         }
         if (!THROW_OUT_BOTTOM.isEmpty()) {
             floorToGetDown = Math.max(THROW_OUT_BOTTOM.first(), floorToGetDown);
         }
-        if (!isGoUp && floorToGetDown != -UNEXIST_FLOOR) {
+        if (!isGoUp && floorToGetDown != -UNEXISTING_FLOOR) {
             return floorToGetDown;
         }
-        if (!isGoUp && floorToGetUp != UNEXIST_FLOOR) {
+        if (!isGoUp && floorToGetUp != UNEXISTING_FLOOR) {
             isGoUp = true;
             return floorToGetUp;
         }
-        if (isGoUp && floorToGetDown != -UNEXIST_FLOOR) {
+        if (isGoUp && floorToGetDown != -UNEXISTING_FLOOR) {
             isGoUp = false;
             return floorToGetDown;
         }
-        return UNEXIST_FLOOR;
+        return UNEXISTING_FLOOR;
     }
 
     public boolean isAvailable() {
         return currentBookedCount + currentCustomersCount <= this.MAX_HUMAN_CAPACITY;
     }
 
-
-    public Elevator(Vector2D position, ElevatorSystemSettings settings,
-                    double wall_size) {
+    public Elevator(Vector2D position, ElevatorSystemSettings settings, double wall_size) {
         super(position, settings.ELEVATOR_SPEED, settings.ELEVATOR_SIZE);
-        this.MAX_HUMAN_CAPACITY = settings.ELEVATOR_MAX_HUMAN_CAPACITY;
-        this.BUILDING_SIZE = settings.BUILDING_SIZE;
-        this.state = ElevatorState.WAIT;
-        this.WALL_SIZE = wall_size;
         this.TIME_TO_STOP_ON_FLOOR = settings.ELEVATOR_OPEN_CLOSE_TIME * 2 +
                 settings.ELEVATOR_AFTER_CLOSE_AFK_TIME + settings.ELEVATOR_WAIT_AS_OPENED_TIME;
+        this.MAX_HUMAN_CAPACITY = settings.ELEVATOR_MAX_HUMAN_CAPACITY;
+        this.state = ElevatorState.WAIT;
+        this.WALL_SIZE = wall_size;
     }
 
     public int getCurrentFloor() {
@@ -97,7 +96,7 @@ public class Elevator extends MovingObject {
 
     public void addFloorToPickUp(int toAddFloor) {
         currentBookedCount++;
-        Map<Integer, Integer> mapToWorkWith;
+        TreeMap<Integer, Integer> mapToWorkWith;
         if (toAddFloor > getCurrentFloor()) {
             mapToWorkWith = PICK_UP_TOP;
         } else {
@@ -123,24 +122,14 @@ public class Elevator extends MovingObject {
     }
 
     public void arrived() {
-        Map<Integer, Integer> mapToWorkWith;
-        if (isGoUp) {
-            mapToWorkWith = PICK_UP_TOP;
-        } else {
-            mapToWorkWith = PICK_UP_BOTTOM;
-        }
+        Map<Integer, Integer> mapToWorkWith = isGoUp ? PICK_UP_TOP : PICK_UP_BOTTOM;
         int currentFloor = getCurrentFloor();
         if (mapToWorkWith.containsKey(currentFloor)) {
             currentBookedCount -= mapToWorkWith.get(currentFloor);
             mapToWorkWith.remove(getCurrentFloor());
         }
 
-        SortedSet<Integer> setToWorkWith;
-        if (isGoUp) {
-            setToWorkWith = THROW_OUT_TOP;
-        } else {
-            setToWorkWith = THROW_OUT_BOTTOM;
-        }
+        SortedSet<Integer> setToWorkWith = isGoUp ? THROW_OUT_TOP : THROW_OUT_BOTTOM;
         setToWorkWith.remove(currentFloor);
     }
 
@@ -149,16 +138,11 @@ public class Elevator extends MovingObject {
     }
 
     public void addFloorToThrowOut(int floorEnd) {
-        SortedSet<Integer> setToWorkWith;
-        if (floorEnd > getCurrentFloor()) {
-            setToWorkWith = THROW_OUT_TOP;
-        } else {
-            setToWorkWith = THROW_OUT_BOTTOM;
-        }
+        SortedSet<Integer> setToWorkWith = floorEnd > getCurrentFloor() ? THROW_OUT_TOP : THROW_OUT_BOTTOM;
         setToWorkWith.add(floorEnd);
     }
 
-    public double getTimeToBeeHere(int requestFloor) {
+    public double getTimeToBeHere(int requestFloor) {
         if (getBooking() == 0) {
             return getTimeToGetTo(requestFloor);
         }
@@ -177,8 +161,7 @@ public class Elevator extends MovingObject {
 
         // 5 6 7 9  on the way
         //1 2 4not on the way
-        double penalty = 0;
-        int curr = getCurrentFloor();
+        double penalty;
         if (isGoUp) {
             if (position.y < getPositionForFloor(requestFloor)) {
                 penalty = Arrays.binarySearch(allTopSorted, requestFloor) * TIME_TO_STOP_ON_FLOOR;
@@ -201,7 +184,6 @@ public class Elevator extends MovingObject {
         }
         return getTimeToGetTo(requestFloor) + penalty;
     }
-
 
     private double getPositionForFloor(int requestFloor) {
         return requestFloor * WALL_SIZE;

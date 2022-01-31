@@ -1,9 +1,7 @@
 package drawable;
 
 import model.objects.MovingObject.Vector2D;
-import tools.GameDrawer;
-
-import java.awt.*;
+import view.GameDrawer;
 
 public interface Drawable {
     void draw(GameDrawer gameDrawer);

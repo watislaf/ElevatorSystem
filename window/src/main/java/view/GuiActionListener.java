@@ -1,21 +1,20 @@
 package view;
 
-import javax.swing.*;
+import lombok.RequiredArgsConstructor;
+
 import java.awt.event.ActionListener;
+import javax.swing.*;
 
 
 import java.awt.event.ActionEvent;
 
+@RequiredArgsConstructor
 public class GuiActionListener implements ActionListener {
-    SwingWindow window;
-
-    public GuiActionListener(SwingWindow window) {
-        this.window = window;
-    }
+    private final SwingWindow WINDOW;
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        window.clicked((JButton) e.getSource());
-        window.repaint();
+        WINDOW.clicked((JButton) e.getSource());
+        WINDOW.repaint();
     }
 }

@@ -1,10 +1,10 @@
 package controller;
 
-import connector.ConnectionSettings;
-import connector.DataClient;
-import connector.OnSocketEvent;
-import connector.Server;
-import connector.protocol.ApplicationSettings;
+import connector.clientServer.ConnectionSettings;
+import connector.clientServer.SocketCompactData;
+import connector.clientServer.SocketEventListener;
+import connector.clientServer.Server;
+import connector.protocol.SettingsData;
 import connector.protocol.Protocol;
 import connector.protocol.ProtocolMessage;
 import controller.customerController.CustomersController;
@@ -14,80 +14,89 @@ import model.Model;
 import tools.Timer;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 
-public class Controller implements OnSocketEvent {
-    static private final int TPS = 40;
-
+/**
+ * Main controller .
+ *
+ * @see CustomersController
+ * @see ElevatorSystemController
+ */
+public class Controller implements SocketEventListener {
     public final ElevatorSystemController ELEVATOR_SYSTEM_CONTROLLER;
-    private final CustomersController CUSTOMER_CONTROLLER;
-
     public final Model MODEL;
-    private long currentTime;
+
+    private final LinkedList<ProtocolMessage> MESSAGES = new LinkedList<>();
+    private final CustomersController CUSTOMER_CONTROLLER;
+    private final Timer TIMER_TO_CHECK_SERVER = new Timer();
+    private final int TPS = 40;
+
     @Setter
     private Server server;
-    private LinkedList<ProtocolMessage> messages = new LinkedList<>();
+    private long currentTime;
 
     @Override
-    public void onReceive(ProtocolMessage message) {
-        synchronized (messages) {
-            messages.add(message);
+    public void onReceiveSocket(ProtocolMessage message) {
+        synchronized (MESSAGES) {
+            MESSAGES.add(message);
         }
     }
 
     @Override
-    public void onNewConnection(DataClient client) {
-        server.Send(client,
-                new ProtocolMessage(
-                        Protocol.APPLICATION_SETTINGS,
-                        new ApplicationSettings(
-                                ELEVATOR_SYSTEM_CONTROLLER.SETTINGS, CUSTOMER_CONTROLLER.SETTINGS),
-                        currentTime));
+    public void onNewSocketConnection(SocketCompactData client) {
+        var message =
+                new ProtocolMessage(Protocol.APPLICATION_SETTINGS,
+                        new SettingsData(ELEVATOR_SYSTEM_CONTROLLER.SETTINGS, CUSTOMER_CONTROLLER.CUSTOMERS_SETTINGS),
+                        currentTime);
+        server.Send(client, message);
     }
 
     public Controller(Model model) {
         this.MODEL = model;
-        ELEVATOR_SYSTEM_CONTROLLER = new ElevatorSystemController(this);
-        CUSTOMER_CONTROLLER = new CustomersController(this);
+        this.ELEVATOR_SYSTEM_CONTROLLER = new ElevatorSystemController(this);
+        this.CUSTOMER_CONTROLLER = new CustomersController(this);
     }
-
 
     public void start() throws InterruptedException {
         currentTime = System.currentTimeMillis();
-        Timer timer = new Timer();
         server.start();
-        while (true) {
-            TimeUnit.MILLISECONDS.sleep(Math.round(1000. / TPS));
-            long deltaTime = System.currentTimeMillis() - currentTime;
 
-            timer.tick(deltaTime);
+        while (true) {
+            long deltaTime = System.currentTimeMillis() - currentTime;
             currentTime += deltaTime;
 
-            if (timer.isReady()) {
-                timer.restart(Math.round(1000. / ConnectionSettings.SSPS));
-                server.Send(new ProtocolMessage(Protocol.UPDATE_DATA, MODEL.getDataToSent(), currentTime));
-            }
-
-            synchronized(messages) {
-                messages.forEach(this::processMessage);
-                messages.clear();
-            }
-            CUSTOMER_CONTROLLER.tick(deltaTime);
-            ELEVATOR_SYSTEM_CONTROLLER.tick(deltaTime);
-            MODEL.clearDead();
+            writeAndReadServerStream(deltaTime);
+            tickControllers(deltaTime);
+            TimeUnit.MILLISECONDS.sleep(Math.round(1000. / TPS));
         }
     }
 
-    private void processMessage(ProtocolMessage protocolMessage) {
-        switch (protocolMessage.protocol()) {
-            case CREATE_CUSTOMER -> {
-                if(protocolMessage.data() instanceof LinkedList ) {
-                    LinkedList<Integer> floors = (LinkedList<Integer>) protocolMessage.data();
-                    CUSTOMER_CONTROLLER.CreateCustomer(floors.get(1), floors.get(0));
-                }
+    private void writeAndReadServerStream(long deltaTime) {
+        TIMER_TO_CHECK_SERVER.tick(deltaTime);
+        if (TIMER_TO_CHECK_SERVER.isReady()) {
+            server.Send(new ProtocolMessage(Protocol.UPDATE_DATA, MODEL.getDataToSent(), currentTime));
+            TIMER_TO_CHECK_SERVER.restart(Math.round(1000. / ConnectionSettings.SSPS));
+        }
 
+        synchronized (MESSAGES) {
+            MESSAGES.forEach(this::processMessage);
+            MESSAGES.clear();
+        }
+    }
+
+    private void tickControllers(long deltaTime) {
+        CUSTOMER_CONTROLLER.tick(deltaTime);
+        ELEVATOR_SYSTEM_CONTROLLER.tick(deltaTime);
+        MODEL.clearDead();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void processMessage(ProtocolMessage protocolMessage) {
+        if (protocolMessage.protocol() == Protocol.CREATE_CUSTOMER) {
+            if (protocolMessage.data() instanceof LinkedList) {
+                LinkedList<Integer> floors = (LinkedList<Integer>) protocolMessage.data();
+                CUSTOMER_CONTROLLER.CreateCustomer(floors.get(1), floors.get(0));
             }
         }
     }

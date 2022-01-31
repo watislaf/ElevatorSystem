@@ -1,7 +1,7 @@
 package model;
 
-import connector.protocol.ApplicationCreatures;
-import connector.protocol.ApplicationSettings;
+import connector.protocol.CreaturesData;
+import connector.protocol.SettingsData;
 import drawable.ColorSettings;
 import drawable.Drawable;
 import drawable.drawableObjects.*;
@@ -18,26 +18,24 @@ import java.util.LinkedList;
 
 
 public class WindowModel {
-    @Setter
-    @Getter
-    private ColorSettings colorSettings;
+    public final ColorSettings COLOR_SETTINGS = new ColorSettings();
 
     @Getter
-    private ApplicationSettings settings;
-
-    LinkedList<DrawableElevator> elevators;
-    LinkedList<DrawableCustomer> customers;
-
-    LinkedList<Button> buttons;
-    LinkedList<ElevatorBorder> border;
-    LinkedList<BlackSpace> blackSpaces;
-    LinkedList<FlyingText> flyingTexts;
-    LinkedList<HidingWall> hidingWall;
+    private SettingsData settings;
     @Getter
     @Setter
-    long lastServerRespondTime = 0;
+    private long lastServerRespondTime = 0;
 
-    public void updateData(ApplicationCreatures data) {
+    private LinkedList<DrawableElevator> elevators;
+    private LinkedList<DrawableCustomer> customers;
+
+    private LinkedList<Button> buttons;
+    private LinkedList<ElevatorBorder> border;
+    private LinkedList<BlackSpace> blackSpaces;
+    private LinkedList<FlyingText> flyingTexts;
+    private LinkedList<HidingWall> hidingWall;
+
+    public void updateData(CreaturesData data) {
         this.apply(data.ELEVATORS, elevators);
         this.apply(data.CUSTOMERS, customers);
 
@@ -45,12 +43,11 @@ public class WindowModel {
         data.ELEVATORS.forEach(
                 creatureA -> {
                     if (elevators.stream()
-                            .noneMatch(creatureB -> creatureA.getId() == creatureB.getId())
-                    ) {
+                            .noneMatch(creatureB -> creatureA.getId() == creatureB.getId())) {
                         elevators.add(
                                 new DrawableElevator(creatureA, settings.ELEVATOR_OPEN_CLOSE_TIME,
-                                        colorSettings.ELEVATOR_BACKGROUND_COLOR, colorSettings.DOORS_COLOR,
-                                        colorSettings.BORDER_COLOR));
+                                        COLOR_SETTINGS.ELEVATOR_BACKGROUND_COLOR, COLOR_SETTINGS.DOORS_COLOR,
+                                        COLOR_SETTINGS.BORDER_COLOR));
                     }
                 }
         );
@@ -58,10 +55,9 @@ public class WindowModel {
         data.CUSTOMERS.forEach(
                 creatureA -> {
                     if (customers.stream()
-                            .noneMatch(creatureB -> creatureA.getId() == creatureB.getId())
-                    ) {
+                            .noneMatch(creatureB -> creatureA.getId() == creatureB.getId())) {
                         customers.add(new DrawableCustomer(creatureA,
-                                colorSettings.CUSTOMER_SKIN_COLOR));
+                                COLOR_SETTINGS.CUSTOMER_SKIN_COLOR));
                     }
                 }
         );
@@ -80,9 +76,9 @@ public class WindowModel {
                 / (settings.ELEVATORS_COUNT + 1);
         for (int i = 0; i < settings.FLOORS_COUNT; i++) {
             hidingWall.add(new HidingWall(
-                    new Vector2D(settings.BUILDING_SIZE.x / 2, wallSize * i + settings.ELEVATOR_SIZE.y),
+                    new Vector2D(settings.BUILDING_SIZE.x / 2., wallSize * i + settings.ELEVATOR_SIZE.y),
                     new Point(settings.BUILDING_SIZE.x, (wallSize - settings.ELEVATOR_SIZE.y)),
-                    colorSettings.WALL_COLOR
+                    COLOR_SETTINGS.WALL_COLOR
             ));
             for (int j = 0; j < settings.ELEVATORS_COUNT; j++) {
                 buttons.add(
@@ -91,15 +87,15 @@ public class WindowModel {
                                         distanceBetweenElevators * (j + 1) + settings.BUTTON_RELATIVE_POSITION,
                                         i * wallSize + settings.CUSTOMER_SIZE.y + 4),
                                 new Point(5, 5),
-                                colorSettings.BUTTON_ON_COLOR, colorSettings.BUTTON_OF_COLOR));
+                                COLOR_SETTINGS.BUTTON_ON_COLOR, COLOR_SETTINGS.BUTTON_OF_COLOR));
                 border.add(new ElevatorBorder(
                         new Vector2D(distanceBetweenElevators * (j + 1), i * wallSize),
                         elevators.get(j),
-                        wallSize, colorSettings.BORDER_COLOR, colorSettings.NUMBER_COLOR));
+                        wallSize, COLOR_SETTINGS.BORDER_COLOR, COLOR_SETTINGS.NUMBER_COLOR));
 
                 blackSpaces.add(new BlackSpace(
                         new Vector2D(distanceBetweenElevators * (j + 1), i * wallSize),
-                        elevators.get(j), colorSettings.BLACK_SPACE_COLOR, border.get(0).BORDER_SIZE));
+                        elevators.get(j), COLOR_SETTINGS.BLACK_SPACE_COLOR, border.get(0).BORDER_SIZE));
             }
         }
     }
@@ -138,8 +134,7 @@ public class WindowModel {
 
     private Collection<Drawable> getElevatorDoors() {
         LinkedList<Drawable> elevatorDoors = new LinkedList<>();
-        elevators.forEach(elevator -> elevatorDoors.add(elevator.getDoors()));
-
+        elevators.forEach(elevator -> elevatorDoors.add(elevator.DOORS));
         return elevatorDoors;
     }
 
@@ -155,31 +150,28 @@ public class WindowModel {
         return elevators.stream().filter(elevator -> elevator.getId() == id).findFirst().get();
     }
 
-    public void setSettings(ApplicationSettings settings) {
+    public void setSettings(SettingsData settings) {
         this.settings = settings;
         this.elevators = new LinkedList<>();
         this.customers = new LinkedList<>();
-
         this.flyingTexts = new LinkedList<>();
     }
 
     public Button getNearestButton(Vector2D data) {
         return buttons.stream()
-                .reduce(
-                        null,
-                        (buttonA, buttonB) -> {
-                            if (buttonA == null) {
-                                return buttonB;
-                            }
-                            if (buttonB == null) {
-                                return buttonA;
-                            }
-                            if (data.getNearest(buttonA.getPosition(), buttonB.getPosition())
-                                    .equals(buttonA.getPosition())) {
-                                return buttonA;
-                            }
-                            return buttonB;
-                        });
+                .reduce(null, (buttonA, buttonB) -> {
+                    if (buttonA == null) {
+                        return buttonB;
+                    }
+                    if (buttonB == null) {
+                        return buttonA;
+                    }
+                    if (data.getNearest(buttonA.getPosition(), buttonB.getPosition())
+                            .equals(buttonA.getPosition())) {
+                        return buttonA;
+                    }
+                    return buttonB;
+                });
     }
 
     public DrawableCustomer getCustomer(long id) {

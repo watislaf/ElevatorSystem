@@ -1,10 +1,13 @@
-package tools;
+package view;
 
 import model.objects.MovingObject.Creature;
 import model.objects.MovingObject.Vector2D;
 
 import java.awt.*;
-
+/*
+* this class transform game coordinates to normal coordinates and viceversa , so u can change
+* real coordinates and have an image streched in a normal natural way.
+ */
 public class GameDrawer {
     // The ratio of game coordinates to real
     private final Graphics2D GRAPHICS_2D;
@@ -22,28 +25,6 @@ public class GameDrawer {
 
         originalOffset = new Point((REAL_SIZE.x - new_size.x) / 2, (REAL_SIZE.y - new_size.y) / 2);
     }
-
-
-    public Vector2D windowToGameCoordinate(Vector2D window_coordinate) {
-        return (window_coordinate.sub(new Vector2D(originalOffset))).multiply(SCALING_COEFFICIENT);
-    }
-
-    public Vector2D gameToWindowCoordinate(Vector2D game_coordinate) {
-        return (game_coordinate.divide(SCALING_COEFFICIENT)).add(new Vector2D((originalOffset)));
-    }
-
-    public Vector2D gameToWindowSize(Vector2D game_size) {
-        return game_size.divide(SCALING_COEFFICIENT);
-    }
-
-    public double windowToGameLength(double length) {
-        return length * SCALING_COEFFICIENT;
-    }
-
-    public double gameToWindowLength(double game_length) {
-        return game_length / SCALING_COEFFICIENT;
-    }
-
 
     public void setColor(Color red) {
         GRAPHICS_2D.setColor(red);

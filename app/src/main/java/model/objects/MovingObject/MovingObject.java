@@ -8,44 +8,40 @@ import java.awt.*;
 
 public class MovingObject extends Creature {
     protected static final int SPEED_COEFFICIENT = 1000;
+    private final double SPEED;
 
-    public double getSpeed() {
-        return speed * speedMultiPly;
-    }
-
-    private double speed;
     @Getter
     @Setter
-    protected double speedMultiPly = 1;
-
+    private double speedMultiPly = 1;
     @Getter
     @Setter
     protected boolean isDead = false;
-
-
     protected Vector2D destination;
 
     public MovingObject(Vector2D position, double speed, Point size) {
         super(position, size);
         this.destination = position;
-        this.speed = speed;
+        this.SPEED = speed;
     }
 
     public MovingObject(Vector2D position, double speed) {
         super(position);
         this.destination = position;
-        this.speed = speed;
+        this.SPEED = speed;
     }
 
     public void tick(long delta_time) {
-        if (isReachedDestination()) {
-            return;
+        if (!isReachedDestination()) {
+            position = position.trendTo(destination, delta_time * getSpeed() / SPEED_COEFFICIENT);
         }
-        position = position.trendTo(destination, delta_time * speed / SPEED_COEFFICIENT);
     }
 
     public boolean isReachedDestination() {
         return new Vector2D(this.destination).getVectorTo(this.position).getLength() < Vector2D.EPSILON;
+    }
+
+    public double getSpeed() {
+        return SPEED * speedMultiPly;
     }
 
     public void setDestination(Vector2D destination) {

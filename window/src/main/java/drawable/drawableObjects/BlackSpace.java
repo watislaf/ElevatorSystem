@@ -1,30 +1,31 @@
 package drawable.drawableObjects;
 
-import drawable.Drawable;
 import model.objects.MovingObject.Creature;
 import model.objects.MovingObject.Vector2D;
-import tools.GameDrawer;
+import drawable.Drawable;
+import view.GameDrawer;
 
 import java.awt.*;
 
+/*
+ * Spaces to draw there were elevators need to be.
+ */
 public class BlackSpace extends Creature implements Drawable {
-    Color color;
+    private final Color BLACK_SPACES_COLOR;
 
-    public BlackSpace(Vector2D position, Creature parentElevator, Color color, int borderSize) {
+    public BlackSpace(Vector2D position, Creature parentElevator, Color blackSpacesColor, int borderSize) {
         super(position, parentElevator.getSize());
         size = new Point(size.x + borderSize * 2, size.y + borderSize);
-        this.color = color;
+        this.BLACK_SPACES_COLOR = blackSpacesColor;
     }
-
 
     @Override
     public void draw(GameDrawer gameDrawer) {
-        gameDrawer.setColor(color);
+        gameDrawer.setColor(BLACK_SPACES_COLOR);
         gameDrawer.fillRect(this);
     }
 
     public void tick(long delta_time) {
     }
-
 }
 

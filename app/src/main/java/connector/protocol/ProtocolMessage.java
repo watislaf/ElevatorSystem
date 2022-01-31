@@ -1,8 +1,10 @@
 package connector.protocol;
 
-import lombok.Data;
-
 import java.io.Serializable;
 
-public record ProtocolMessage(Protocol protocol, Serializable data,long timeStump) implements Serializable {
+/**
+ * All data, that is sent via socket object stream, is stored by this class.
+ */
+
+public record ProtocolMessage(Protocol protocol, Serializable data, long timeStump) implements Serializable {
 }

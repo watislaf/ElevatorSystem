@@ -1,18 +1,25 @@
 package connector.protocol;
 
-import connector.DataClient;
+
+/**
+ * Decide the type of the arrived protocol message.
+ *
+ * @see ProtocolMessage
+ */
 
 public enum Protocol {
-                        // BOTH
+    //-- BOTH --//
     OK,
+
     //-- FROM_SERVER  --//
-    UPDATE_DATA,                    // ApplicationCreatures
-    APPLICATION_SETTINGS,           // AApplicationSettings
     ELEVATOR_BUTTON_CLICK,          // Vector2D (position of button)
+    CUSTOMER_GET_IN_OUT,            // Integer (customer id)
     ELEVATOR_OPEN,                  // Integer (elevator id)
     ELEVATOR_CLOSE,                 // Integer (elevator id)
-    CUSTOMER_GET_IN_OUT,             // Integer (customer id)
-    // FROM_CLIENT
-    CREATE_CUSTOMER,
+    UPDATE_DATA,                    // ApplicationCreatures
+    APPLICATION_SETTINGS,           // AApplicationSettings
+
+    //-- FROM_CLIENT --//
+    CREATE_CUSTOMER,                // LinkedList<Integer> size of 2 (start floor and end floor)
 
 }
