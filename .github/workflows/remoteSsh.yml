@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: check
-        run: echo  ${{ secrets.HOST }}
+        run: echo  Hi
       - name: executing remote ssh commands using password
         uses: appleboy/ssh-action@master
         with:
