@@ -16,7 +16,7 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           port: 22
           script: |
-            whoami
+            rm -r .ElevatorSystem/ -f
             git clone https://github.com/watislaf/ElevatorSystem.git
-            cd ./ElevatorSystem            
+            cd ./ElevatorSystem/            
             bash ./setupDocker.sh

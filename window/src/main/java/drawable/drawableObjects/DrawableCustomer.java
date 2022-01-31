@@ -35,7 +35,7 @@ public class DrawableCustomer extends Creature implements Drawable {
             return;
         }
         gameDrawer.setColor(COLOR_OF_CUSTOMER);
-        gameDrawer.fillRect(this.interpolationPosition, this.size, Color.DARK_GRAY, 2);
+        gameDrawer.fillRect(this.position, this.size, Color.DARK_GRAY, 2);
     }
 
     @Override
@@ -44,9 +44,9 @@ public class DrawableCustomer extends Creature implements Drawable {
             interpolationPosition = position;
             return;
         }
-        interpolationPosition = interpolationPosition
-                .trendTo(position, position.getVectorTo(interpolationPosition).getLength()
-                        * deltaTime / serverRespondTime);
+//        interpolationPosition = interpolationPosition
+ //               .trendTo(position, position.getVectorTo(interpolationPosition).getLength()
+  //                      * deltaTime / serverRespondTime);
     }
 
     public boolean isNotBehindElevator() {

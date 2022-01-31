@@ -21,7 +21,7 @@ import java.util.LinkedList;
  * @see SwingWindow
  */
 public class WindowController implements SocketEventListener {
-    static private final int TPS = 30;
+    static private final int TPS = 50;
 
     private final LinkedList<ProtocolMessage> MESSAGE = new LinkedList<>();
     private final WindowModel WINDOW_MODEL;
@@ -85,9 +85,9 @@ public class WindowController implements SocketEventListener {
 
     private boolean processMessage(ProtocolMessage message) {
         if (message.protocol() != Protocol.APPLICATION_SETTINGS && message.protocol() != Protocol.UPDATE_DATA) {
-            if (message.timeStump() + 2 * WINDOW_MODEL.getLastServerRespondTime() > currentTime) {
-                return false;
-            }
+          //  if (message.timeStump() + 2 * WINDOW_MODEL.getLastServerRespondTime() > currentTime) {
+          //      return false;
+          //  }
         }
         switch (message.protocol()) {
             case APPLICATION_SETTINGS -> {

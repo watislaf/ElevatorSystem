@@ -53,7 +53,7 @@ public class ElevatorDoors extends Creature implements Drawable {
     }
 
     public void tick(long delta_time) {
-        position = PARENT_ELEVATOR.getInterpolationPosition();
+        position = PARENT_ELEVATOR.getPosition();
         DOORS_TIMER.tick(delta_time);
     }
 

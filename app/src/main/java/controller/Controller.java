@@ -30,7 +30,7 @@ public class Controller implements SocketEventListener {
     private final LinkedList<ProtocolMessage> MESSAGES = new LinkedList<>();
     private final CustomersController CUSTOMER_CONTROLLER;
     private final Timer TIMER_TO_CHECK_SERVER = new Timer();
-    private final int TPS = 40;
+    private final int TPS = 50;
 
     @Setter
     private Server server;
