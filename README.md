@@ -8,11 +8,11 @@ Github actions and docker was used to atomatically deploy the project to the ser
 ___
 
 <p align=center>
-  <img  src="https://github.com/watislaf/ElevatorSystem/main/outpup1.gif" width="40%"> 
+  <img  src="https://github.com/watislaf/ElevatorSystem/blob/main/outpup1.gif" width="40%"> 
   </p>
  
 <p align=center>
-  <img  src="https://github.com/watislaf/ElevatorSystem/main/outpup2.gif"  width="70% " >
+  <img  src="https://github.com/watislaf/ElevatorSystem/blob/main/outpup2.gif"  width="70% " >
   </p>
 
 
