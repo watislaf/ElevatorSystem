@@ -8,7 +8,7 @@ jobs:
     steps:
       - name: executing remote ssh commands using password
         uses: appleboy/ssh-action@master
-        run: echo ${{ secrets.HOST }}
+        run: echo "${{ secrets.HOST }}"
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
