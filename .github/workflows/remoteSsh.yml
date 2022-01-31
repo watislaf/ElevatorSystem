@@ -6,10 +6,11 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
+      - name: check
+        run: echo  ${{ secrets.HOST }}
       - name: executing remote ssh commands using password
         uses: appleboy/ssh-action@master
         with:
-          run: echo  ${{ secrets.HOST }}
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
