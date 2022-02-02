@@ -50,7 +50,7 @@ or use docker.
   sudo bash ./setupDocker  
 ```
 
-### Docker not installed
+### Docker is not installed
 
 ```bat
   sudo bash ./installDocker  
