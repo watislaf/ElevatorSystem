@@ -1,5 +1,6 @@
 package connector.protocol;
 
+import connector.clientServer.ConnectionSettings;
 import controller.customerController.CustomerSettings;
 import controller.elevatorSystemController.ElevatorSystemSettings;
 
@@ -22,6 +23,7 @@ public class SettingsData implements Serializable {
     public final Point CUSTOMER_SIZE;
     public final int ELEVATORS_COUNT;
     public final int FLOORS_COUNT;
+    public final String VERSION;
 
     public SettingsData(ElevatorSystemSettings settingsElevator, CustomerSettings settingsCustomer) {
         BUTTON_RELATIVE_POSITION = settingsElevator.BUTTON_RELATIVE_POSITION;
@@ -30,6 +32,7 @@ public class SettingsData implements Serializable {
         ELEVATOR_SIZE = settingsElevator.ELEVATOR_SIZE;
         CUSTOMER_SIZE = settingsCustomer.CUSTOMER_SIZE;
         FLOORS_COUNT = settingsElevator.FLOORS_COUNT;
+        VERSION = ConnectionSettings.VERSION;
         ELEVATORS_COUNT = settingsElevator.getElevatorsCount();
     }
 }

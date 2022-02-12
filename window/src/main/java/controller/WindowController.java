@@ -1,5 +1,6 @@
 package controller;
 
+import connector.clientServer.ConnectionSettings;
 import connector.clientServer.SocketEventListener;
 import connector.clientServer.SocketCompactData;
 import drawable.drawableObjects.FlyingText;
@@ -43,7 +44,7 @@ public class WindowController implements SocketEventListener {
             return;
         }
         if (WINDOW_MODEL.isNeedToInitialise() && message.protocol() != Protocol.APPLICATION_SETTINGS
-                && message.protocol() != Protocol.UPDATE_DATA)   {
+                && message.protocol() != Protocol.UPDATE_DATA) {
             return;
         }
         synchronized (MESSAGE) {
@@ -98,6 +99,11 @@ public class WindowController implements SocketEventListener {
         switch (message.protocol()) {
             case APPLICATION_SETTINGS -> {
                 SettingsData settings = (SettingsData) message.data();
+                if (!ConnectionSettings.VERSION.equals(settings.VERSION)) {
+                    System.out.printf("You have different versions with sever. Your version: %s, server version %s%n",
+                            ConnectionSettings.VERSION, settings.VERSION);
+                    return true;
+                }
                 WINDOW_MODEL.setSettings(settings);
                 currentTime = message.timeStump();
             }
