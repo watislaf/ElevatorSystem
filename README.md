@@ -1,18 +1,18 @@
 # Elevator System
 
-This project simulate elevators in building. The project is divided into two parts, Server part that manipulate objects
-and Client part that draw it in real time.
+This project simulates elevators in a building. The project is divided into two parts, the Server part that manipulates objects
+and the Client part that draws them in real time. 
 
 Github actions and docker was used to atomatically deploy the project to the server.
 
 ___
 
 <p align=center>
-  <img  src="https://github.com/watislaf/ElevatorSystem/outpup1.gif" width="40%"> 
+  <img  src="https://github.com/watislaf/ElevatorSystem/blob/main/outpup1.gif" width="40%"> 
   </p>
  
 <p align=center>
-  <img  src="https://github.com/watislaf/ElevatorSystem/outpup2.gif"  width="70% " >
+  <img  src="https://github.com/watislaf/ElevatorSystem/blob/main/outpup2.gif"  width="70% " >
   </p>
 
 
@@ -50,7 +50,7 @@ or use docker.
   sudo bash ./setupDocker  
 ```
 
-### Docker not installed
+### Docker is not installed
 
 ```bat
   sudo bash ./installDocker  
