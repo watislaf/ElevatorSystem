@@ -21,7 +21,6 @@ public class DrawableCustomer extends Creature implements Drawable {
     private double serverRespondTime;
     private Vector2D interpolationPosition;
 
-
     public DrawableCustomer(Creature creature, Color[] color) {
         super(creature);
         this.COLOR_OF_CUSTOMER = color[(int) (getId() % color.length)];
