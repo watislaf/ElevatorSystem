@@ -31,7 +31,7 @@ public class Controller implements SocketEventListener {
     private final CustomersController CUSTOMER_CONTROLLER;
     private final Timer TIMER_TO_CHECK_SERVER = new Timer();
     private final int TPS = 50;
-
+    private double gameSpeed = 1;
     @Setter
     private Server server;
     private long currentTime;
@@ -47,7 +47,8 @@ public class Controller implements SocketEventListener {
     public void onNewSocketConnection(SocketCompactData client) {
         var message =
                 new ProtocolMessage(Protocol.APPLICATION_SETTINGS,
-                        new SettingsData(ELEVATOR_SYSTEM_CONTROLLER.SETTINGS, CUSTOMER_CONTROLLER.CUSTOMERS_SETTINGS),
+                        new SettingsData(ELEVATOR_SYSTEM_CONTROLLER.SETTINGS, CUSTOMER_CONTROLLER.CUSTOMERS_SETTINGS,
+                                gameSpeed),
                         currentTime);
         server.Send(client, message);
     }
@@ -67,7 +68,7 @@ public class Controller implements SocketEventListener {
             currentTime += deltaTime;
 
             writeAndReadServerStream(deltaTime);
-            tickControllers(deltaTime);
+            tickControllers((long) (deltaTime * gameSpeed));
             TimeUnit.MILLISECONDS.sleep(Math.round(1000. / TPS));
         }
     }
@@ -105,8 +106,13 @@ public class Controller implements SocketEventListener {
                 var message =
                         new ProtocolMessage(Protocol.APPLICATION_SETTINGS,
                                 new SettingsData(ELEVATOR_SYSTEM_CONTROLLER.SETTINGS,
-                                        CUSTOMER_CONTROLLER.CUSTOMERS_SETTINGS),
+                                        CUSTOMER_CONTROLLER.CUSTOMERS_SETTINGS, gameSpeed),
                                 currentTime);
+                server.Send(message);
+            }
+            case CHANGE_GAME_SPEED -> {
+                gameSpeed *= (double) protocolMessage.data();
+                var message = new ProtocolMessage(Protocol.CHANGE_GAME_SPEED, gameSpeed, currentTime);
                 server.Send(message);
             }
         }

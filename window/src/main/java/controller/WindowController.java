@@ -32,6 +32,7 @@ public class WindowController implements SocketEventListener {
     private Client client;
     private long currentTime;
     private int lastFloorButtonClickedNumber = -1;
+    private double gameSpeed = 1;
 
     public WindowController(WindowModel windowModel) {
         WINDOW_MODEL = windowModel;
@@ -71,7 +72,7 @@ public class WindowController implements SocketEventListener {
                 if (!GUI.resized()) {
                     GUI.updateButtonsAndSliders(WINDOW_MODEL);
                 }
-                WINDOW_MODEL.getDrawableOjects().forEach(object -> object.tick(deltaTime));
+                WINDOW_MODEL.getDrawableOjects().forEach(object -> object.tick((long) (deltaTime * gameSpeed)));
                 WINDOW_MODEL.clearDead();
                 GUI.updateButtonsAndSliders(WINDOW_MODEL);
             }
@@ -105,6 +106,7 @@ public class WindowController implements SocketEventListener {
                     return true;
                 }
                 WINDOW_MODEL.setSettings(settings);
+                gameSpeed = settings.GAME_SPEED;
                 currentTime = message.timeStump();
             }
             case UPDATE_DATA -> {
@@ -122,6 +124,7 @@ public class WindowController implements SocketEventListener {
             case ELEVATOR_OPEN -> WINDOW_MODEL.getElevator((long) message.data()).DOORS.changeDoorsState(false);
             case ELEVATOR_CLOSE -> WINDOW_MODEL.getElevator((long) message.data()).DOORS.changeDoorsState(true);
             case CUSTOMER_GET_IN_OUT -> WINDOW_MODEL.changeBehindElevatorForCustomer((long) message.data());
+            case CHANGE_GAME_SPEED -> gameSpeed = (double) message.data();
         }
         return true;
     }
@@ -142,5 +145,13 @@ public class WindowController implements SocketEventListener {
 
     public void changeElevatorsCount(boolean isAdding) {
         client.send(new ProtocolMessage(Protocol.CHANGE_ELEVATORS_COUNT, isAdding, currentTime));
+    }
+
+    public void increaseSpeed() {
+        client.send(new ProtocolMessage(Protocol.CHANGE_GAME_SPEED, 1.5, currentTime));
+    }
+
+    public void decreesSpeed() {
+        client.send(new ProtocolMessage(Protocol.CHANGE_GAME_SPEED, 1 / 1.5, currentTime));
     }
 }

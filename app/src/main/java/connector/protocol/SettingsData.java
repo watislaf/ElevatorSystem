@@ -23,9 +23,10 @@ public class SettingsData implements Serializable {
     public final Point CUSTOMER_SIZE;
     public final int ELEVATORS_COUNT;
     public final int FLOORS_COUNT;
+    public final double GAME_SPEED;
     public final String VERSION;
 
-    public SettingsData(ElevatorSystemSettings settingsElevator, CustomerSettings settingsCustomer) {
+    public SettingsData(ElevatorSystemSettings settingsElevator, CustomerSettings settingsCustomer, double gameSpeed) {
         BUTTON_RELATIVE_POSITION = settingsElevator.BUTTON_RELATIVE_POSITION;
         ELEVATOR_OPEN_CLOSE_TIME = settingsElevator.ELEVATOR_OPEN_CLOSE_TIME;
         BUILDING_SIZE = settingsElevator.BUILDING_SIZE;
@@ -33,6 +34,7 @@ public class SettingsData implements Serializable {
         CUSTOMER_SIZE = settingsCustomer.CUSTOMER_SIZE;
         FLOORS_COUNT = settingsElevator.FLOORS_COUNT;
         VERSION = ConnectionSettings.VERSION;
+        GAME_SPEED = gameSpeed;
         ELEVATORS_COUNT = settingsElevator.getElevatorsCount();
     }
 }

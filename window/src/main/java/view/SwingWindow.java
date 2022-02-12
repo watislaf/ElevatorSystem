@@ -19,6 +19,7 @@ public class SwingWindow {
     final Point WINDOW_SIZE = new Point(800, 800);
     private final LinkedList<JButton> ADD_CLIENT_BUTTONS = new LinkedList<>();
     private final LinkedList<JButton> ADD_REDUCE_ELEVATORS_BUTTONS = new LinkedList<>();
+    private final LinkedList<JButton> CHANGE_SPEED_BUTTONS = new LinkedList<>();
 
     private JFrame frame;
     private Dimension resize;
@@ -39,6 +40,8 @@ public class SwingWindow {
         }
         ADD_REDUCE_ELEVATORS_BUTTONS.add(createButton("^", windowModel.COLOR_SETTINGS.JBUTTONS_COLOR));
         ADD_REDUCE_ELEVATORS_BUTTONS.add(createButton("v", windowModel.COLOR_SETTINGS.JBUTTONS_COLOR));
+        CHANGE_SPEED_BUTTONS.add(createButton("<", windowModel.COLOR_SETTINGS.JBUTTONS_COLOR));
+        CHANGE_SPEED_BUTTONS.add(createButton(">", windowModel.COLOR_SETTINGS.JBUTTONS_COLOR));
     }
 
     private JButton createButton(String text, Color buttonColor) {
@@ -90,6 +93,9 @@ public class SwingWindow {
             ADD_REDUCE_ELEVATORS_BUTTONS.get(i).setBounds(
                     new Rectangle(50, 50 + i * 100,
                             50, 50));
+            CHANGE_SPEED_BUTTONS.get(i).setBounds(
+                    new Rectangle(50 + i * 50, 100,
+                            50, 50));
         }
 
     }
@@ -115,6 +121,12 @@ public class SwingWindow {
         }
         if (ADD_REDUCE_ELEVATORS_BUTTONS.get(1) == source) {
             controller.changeElevatorsCount(false);
+        }
+        if (CHANGE_SPEED_BUTTONS.get(0) == source) {
+            controller.decreesSpeed();
+        }
+        if (CHANGE_SPEED_BUTTONS.get(1) == source) {
+            controller.increaseSpeed();
         }
     }
 }
