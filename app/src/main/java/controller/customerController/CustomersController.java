@@ -144,7 +144,6 @@ public class CustomersController {
                         - CUSTOMERS_SETTINGS.CUSTOMER_SPEED / 3,
                 CUSTOMERS_SETTINGS.CUSTOMER_SPEED
                         + CUSTOMERS_SETTINGS.CUSTOMER_SPEED / 3);
-
         var startPosition = getStartPositionForCustomer(floorStart);
         var customer = new Customer(floorStart, floorEnd, startPosition, speed,
                 CUSTOMERS_SETTINGS.CUSTOMER_SIZE);
