@@ -59,7 +59,7 @@ public class Vector2D extends Point2D.Double implements Serializable {
     }
 
     public Vector2D sub(Vector2D vectorB) {
-        return new Vector2D(x - vectorB.x, y + vectorB.y);
+        return new Vector2D(x - vectorB.x, y - vectorB.y);
     }
 
     public Vector2D trendTo(Vector2D destination, double length) {

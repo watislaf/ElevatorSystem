@@ -14,12 +14,14 @@ import java.awt.Point;
 public class Customer extends MovingObject {
     private final Timer TIMER = new Timer();
     private final int FLOOR_TO_END;
+
     @Setter
     private CustomerState state = CustomerState.GO_TO_BUTTON;
     @Setter
-    private Elevator currentElevator;
-    @Setter
     private int currentFlor;
+
+    private Elevator currentElevator;
+    private double lastCurrentElevatorXPosition;
 
     public Customer(int currentFlor, int floorEnd, Vector2D position, double speed, Point size) {
         super(position, speed, size);
@@ -29,16 +31,32 @@ public class Customer extends MovingObject {
 
     @Override
     public void tick(long deltaTime) {
-        TIMER.tick(deltaTime);
         super.tick(deltaTime);
-
-        if (currentElevator != null && currentElevator.isInMotion()) {
+        TIMER.tick(deltaTime);
+        if (currentElevator != null) {
             position.y = currentElevator.getPosition().y;
-            setCurrentFlor(currentElevator.getCurrentFloor());
-            setVisible(false);
+            if (lastCurrentElevatorXPosition != currentElevator.getPosition().x) {
+                position.x -= (lastCurrentElevatorXPosition - currentElevator.getPosition().x);
+                lastCurrentElevatorXPosition = currentElevator.getPosition().x;
+            }
+            if (currentElevator.isInMotion()) {
+                setCurrentFlor(currentElevator.getCurrentFloor());
+                setVisible(false);
+            }
+            if (!currentElevator.isVisible()) {
+                isDead = true;
+            }
             return;
         }
+
         setVisible(true);
+    }
+
+    public void setCurrentElevator(Elevator currentElevator) {
+        this.currentElevator = currentElevator;
+        if (currentElevator != null) {
+            lastCurrentElevatorXPosition = currentElevator.getPosition().x;
+        }
     }
 
     public boolean wantsGoUp() {

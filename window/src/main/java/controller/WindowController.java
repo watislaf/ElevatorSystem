@@ -42,6 +42,10 @@ public class WindowController implements SocketEventListener {
         if (WINDOW_MODEL.getSettings() == null && message.protocol() != Protocol.APPLICATION_SETTINGS) {
             return;
         }
+        if (WINDOW_MODEL.isNeedToInitialise() && message.protocol() != Protocol.APPLICATION_SETTINGS
+                && message.protocol() != Protocol.UPDATE_DATA)   {
+            return;
+        }
         synchronized (MESSAGE) {
             MESSAGE.add(message);
         }
@@ -58,12 +62,11 @@ public class WindowController implements SocketEventListener {
 
         while (true) {
             clientConnectReadWrite();
-
             long deltaTime = System.currentTimeMillis() - lastTime;
             lastTime += deltaTime;
             currentTime += deltaTime;
 
-            if (WINDOW_MODEL.isInitialised()) {
+            if (!WINDOW_MODEL.isNeedToInitialise()) {
                 if (!GUI.resized()) {
                     GUI.updateButtonsAndSliders(WINDOW_MODEL);
                 }
@@ -77,7 +80,6 @@ public class WindowController implements SocketEventListener {
     }
 
     private void clientConnectReadWrite() throws InterruptedException {
-
         if (client.isClosed()) {
             WINDOW_MODEL.clear();
             client.reconect();
@@ -89,16 +91,15 @@ public class WindowController implements SocketEventListener {
 
     private boolean processMessage(ProtocolMessage message) {
         if (message.protocol() != Protocol.APPLICATION_SETTINGS && message.protocol() != Protocol.UPDATE_DATA) {
-          //  if (message.timeStump() + 2 * WINDOW_MODEL.getLastServerRespondTime() > currentTime) {
-          //      return false;
-          //  }
+            //  if (message.timeStump() + 2 * WINDOW_MODEL.getLastServerRespondTime() > currentTime) {
+            //      return false;
+            //  }
         }
         switch (message.protocol()) {
             case APPLICATION_SETTINGS -> {
                 SettingsData settings = (SettingsData) message.data();
                 WINDOW_MODEL.setSettings(settings);
                 currentTime = message.timeStump();
-
             }
             case UPDATE_DATA -> {
                 WINDOW_MODEL.updateData((CreaturesData) message.data());
@@ -114,13 +115,12 @@ public class WindowController implements SocketEventListener {
             }
             case ELEVATOR_OPEN -> WINDOW_MODEL.getElevator((long) message.data()).DOORS.changeDoorsState(false);
             case ELEVATOR_CLOSE -> WINDOW_MODEL.getElevator((long) message.data()).DOORS.changeDoorsState(true);
-            case CUSTOMER_GET_IN_OUT -> WINDOW_MODEL.getCustomer((long) message.data()).changeBehindElevator();
-
+            case CUSTOMER_GET_IN_OUT -> WINDOW_MODEL.changeBehindElevatorForCustomer((long) message.data());
         }
         return true;
     }
 
-    public void clickedButtonWithNumber(int newButtonCLickedNumber) {
+    public void clickedAddCustomerButtonWithNumber(int newButtonCLickedNumber) {
         newButtonCLickedNumber = WINDOW_MODEL.getSettings().FLOORS_COUNT - newButtonCLickedNumber - 1;
         if (lastFloorButtonClickedNumber == -1) {
             lastFloorButtonClickedNumber = newButtonCLickedNumber;
@@ -132,5 +132,9 @@ public class WindowController implements SocketEventListener {
 
         lastFloorButtonClickedNumber = -1;
         client.send(new ProtocolMessage(Protocol.CREATE_CUSTOMER, data, currentTime));
+    }
+
+    public void changeElevatorsCount(boolean isAdding) {
+        client.send(new ProtocolMessage(Protocol.CHANGE_ELEVATORS_COUNT, isAdding, currentTime));
     }
 }

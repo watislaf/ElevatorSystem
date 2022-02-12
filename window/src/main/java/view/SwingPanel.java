@@ -16,7 +16,7 @@ class SwingPanel extends JPanel {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
-        if (!VIEW_MODEL.isInitialised()) {
+        if (VIEW_MODEL.isNeedToInitialise()) {
             return;
         }
         var gameSize = VIEW_MODEL.getSettings().BUILDING_SIZE;

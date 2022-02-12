@@ -37,6 +37,9 @@ public class ElevatorDoors extends Creature implements Drawable {
     @Override
     public void draw(GameDrawer gameDrawer) {
         double percentage = DOORS_TIMER.getPercent();
+        if (!PARENT_ELEVATOR.isVisible()) {
+            return;
+        }
         if (!isCLosed) {
             percentage = 1 - percentage;
         }

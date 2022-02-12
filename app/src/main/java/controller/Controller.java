@@ -93,12 +93,24 @@ public class Controller implements SocketEventListener {
 
     @SuppressWarnings("unchecked")
     private void processMessage(ProtocolMessage protocolMessage) {
-        if (protocolMessage.protocol() == Protocol.CREATE_CUSTOMER) {
-            if (protocolMessage.data() instanceof LinkedList) {
-                LinkedList<Integer> floors = (LinkedList<Integer>) protocolMessage.data();
-                CUSTOMER_CONTROLLER.CreateCustomer(floors.get(1), floors.get(0));
+        switch (protocolMessage.protocol()) {
+            case CREATE_CUSTOMER -> {
+                if (protocolMessage.data() instanceof LinkedList) {
+                    LinkedList<Integer> floors = (LinkedList<Integer>) protocolMessage.data();
+                    CUSTOMER_CONTROLLER.CreateCustomer(floors.get(1), floors.get(0));
+                }
+            }
+            case CHANGE_ELEVATORS_COUNT -> {
+                ELEVATOR_SYSTEM_CONTROLLER.changeElevatorsCount((boolean) protocolMessage.data());
+                var message =
+                        new ProtocolMessage(Protocol.APPLICATION_SETTINGS,
+                                new SettingsData(ELEVATOR_SYSTEM_CONTROLLER.SETTINGS,
+                                        CUSTOMER_CONTROLLER.CUSTOMERS_SETTINGS),
+                                currentTime);
+                server.Send(message);
             }
         }
+
     }
 
     public void Send(Protocol protocol, Serializable data) {

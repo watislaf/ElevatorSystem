@@ -26,10 +26,10 @@ public class SettingsData implements Serializable {
     public SettingsData(ElevatorSystemSettings settingsElevator, CustomerSettings settingsCustomer) {
         BUTTON_RELATIVE_POSITION = settingsElevator.BUTTON_RELATIVE_POSITION;
         ELEVATOR_OPEN_CLOSE_TIME = settingsElevator.ELEVATOR_OPEN_CLOSE_TIME;
-        ELEVATORS_COUNT = settingsElevator.ELEVATOR_COUNT;
         BUILDING_SIZE = settingsElevator.BUILDING_SIZE;
         ELEVATOR_SIZE = settingsElevator.ELEVATOR_SIZE;
         CUSTOMER_SIZE = settingsCustomer.CUSTOMER_SIZE;
         FLOORS_COUNT = settingsElevator.FLOORS_COUNT;
+        ELEVATORS_COUNT = settingsElevator.getElevatorsCount();
     }
 }

@@ -27,18 +27,19 @@ public class WindowModel {
     @Setter
     private long lastServerRespondTime = 0;
 
-    private LinkedList<DrawableElevator> elevators;
-    private LinkedList<DrawableCustomer> customers;
+    private LinkedList<DrawableElevator> elevators = new LinkedList<>();
+    private LinkedList<DrawableCustomer> customers = new LinkedList<>();
 
     private LinkedList<Button> buttons;
     private LinkedList<ElevatorBorder> border;
     private LinkedList<BlackSpace> blackSpaces;
-    private LinkedList<FlyingText> flyingTexts;
+    private LinkedList<FlyingText> flyingTexts = new LinkedList<>();
     private LinkedList<HidingWall> hidingWall;
+    private boolean needToInitialize = true;
 
     public void updateData(CreaturesData data) {
-        this.apply(data.ELEVATORS, elevators);
-        this.apply(data.CUSTOMERS, customers);
+        this.applyArryvedData(data.ELEVATORS, elevators);
+        this.applyArryvedData(data.CUSTOMERS, customers);
 
         // Add
         data.ELEVATORS.forEach(
@@ -62,16 +63,12 @@ public class WindowModel {
                     }
                 }
         );
-        if (!isInitialised()) {
+        if (isNeedToInitialise()) {
             initialiseFirstData();
         }
     }
 
     private void initialiseFirstData() {
-        this.buttons = new LinkedList<>();
-        this.blackSpaces = new LinkedList<>();
-        this.border = new LinkedList<>();
-        this.hidingWall = new LinkedList<>();
         var wallSize = settings.BUILDING_SIZE.y / settings.FLOORS_COUNT;
         double distanceBetweenElevators = ((double) settings.BUILDING_SIZE.x)
                 / (settings.ELEVATORS_COUNT + 1);
@@ -82,13 +79,12 @@ public class WindowModel {
                     COLOR_SETTINGS.WALL_COLOR
             ));
             for (int j = 0; j < settings.ELEVATORS_COUNT; j++) {
-                buttons.add(
-                        new Button(
-                                new Vector2D(
-                                        distanceBetweenElevators * (j + 1) + settings.BUTTON_RELATIVE_POSITION,
-                                        i * wallSize + settings.CUSTOMER_SIZE.y + 4),
-                                new Point(5, 5),
-                                COLOR_SETTINGS.BUTTON_ON_COLOR, COLOR_SETTINGS.BUTTON_OF_COLOR));
+                buttons.add(new Button(new Vector2D(
+                        distanceBetweenElevators * (j + 1) + settings.BUTTON_RELATIVE_POSITION,
+                        i * wallSize + settings.CUSTOMER_SIZE.y + 4),
+                        new Point(5, 5),
+                        COLOR_SETTINGS.BUTTON_ON_COLOR, COLOR_SETTINGS.BUTTON_OF_COLOR));
+
                 border.add(new ElevatorBorder(
                         new Vector2D(distanceBetweenElevators * (j + 1), i * wallSize),
                         elevators.get(j),
@@ -99,9 +95,10 @@ public class WindowModel {
                         elevators.get(j), COLOR_SETTINGS.BLACK_SPACE_COLOR, border.get(0).BORDER_SIZE));
             }
         }
+        needToInitialize = false;
     }
 
-    private <T extends Creature> void apply(LinkedList<Creature> creatures_came, LinkedList<T> creatures_to_apply) {
+    private <T extends Creature> void applyArryvedData(LinkedList<Creature> creatures_came, LinkedList<T> creatures_to_apply) {
         // erease
         creatures_to_apply.removeIf(
                 creatureA -> creatures_came.stream().noneMatch(
@@ -149,16 +146,18 @@ public class WindowModel {
 
     public DrawableElevator getElevator(long id) {
         AtomicReference<DrawableElevator> tmp = new AtomicReference<>();
-          elevators.stream().filter(elevator -> elevator.getId() == id).findFirst().ifPresent(tmp::set);
-          return tmp.get();
+        elevators.stream().filter(elevator -> elevator.getId() == id).findFirst().ifPresent(tmp::set);
+        return tmp.get();
     }
 
 
     public void setSettings(SettingsData settings) {
         this.settings = settings;
-        this.elevators = new LinkedList<>();
-        this.customers = new LinkedList<>();
-        this.flyingTexts = new LinkedList<>();
+        this.buttons = new LinkedList<>();
+        this.blackSpaces = new LinkedList<>();
+        this.border = new LinkedList<>();
+        this.hidingWall = new LinkedList<>();
+        needToInitialize = true;
     }
 
     public Button getNearestButton(Vector2D data) {
@@ -178,12 +177,13 @@ public class WindowModel {
                 });
     }
 
-    public DrawableCustomer getCustomer(long id) {
-        return customers.stream().filter(drawableCustomer -> drawableCustomer.getId() == id).findFirst().get();
+    public void changeBehindElevatorForCustomer(long id) {
+        customers.stream().filter(drawableCustomer -> drawableCustomer.getId() == id).findFirst().ifPresent(
+                DrawableCustomer::changeBehindElevator);
     }
 
-    public boolean isInitialised() {
-        return border != null;
+    public boolean isNeedToInitialise() {
+        return needToInitialize;
     }
 
     public void clear() {

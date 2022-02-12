@@ -12,6 +12,8 @@ import java.util.Random;
 
 import tools.Timer;
 
+import javax.swing.*;
+
 /**
  * Manipulate all customers in game.
  *
@@ -56,7 +58,7 @@ public class CustomersController {
 
     private void processGoToButton(Customer customer) {
         var buttonPosition = CONTROLLER.MODEL.getBuilding()
-                .getClosestButtonOnFloor(customer.getPosition(), customer.getCurrentFlor());
+                .getClosestButtonOnFloor(customer.getPosition());
         customer.setDestination(buttonPosition);
         if (customer.isReachedDestination()) {
             ELEVATOR_SYSTEM_CONTROLLER.buttonClick(new ElevatorRequest(customer.getPosition(), customer.wantsGoUp()));
@@ -103,8 +105,8 @@ public class CustomersController {
             var makeSpaceInElevator = ELEVATOR_SYSTEM_CONTROLLER.SETTINGS.ELEVATOR_SIZE.x / 2;
             var newDestination = new Vector2D(
                     new Random().nextDouble(
-                            -makeSpaceInElevator - customer.getSize().x / 4.,
-                            makeSpaceInElevator - customer.getSize().x / 2. - 8 ), 0);
+                            -makeSpaceInElevator,
+                            makeSpaceInElevator - customer.getSize().x), 0);
             ELEVATOR_SYSTEM_CONTROLLER.setFloorToReach(customer.getCurrentElevator(), customer.getFLOOR_TO_END());
             customer.setDestination(customer.getPosition().add(newDestination));
             customer.setState(CustomerState.STAY_IN);
@@ -152,13 +154,13 @@ public class CustomersController {
     }
 
     private Vector2D getStartPositionForCustomer(int floorStart) {
-        Vector2D start_position = CONTROLLER.MODEL.getBuilding().getStartPositionAfterBuilding(floorStart);
-        // So u can't see customer whet it spawns
-        if (start_position.x == 0) {
-            start_position.x -= CUSTOMERS_SETTINGS.CUSTOMER_SIZE.x * 2;
+        Vector2D startPosition = CONTROLLER.MODEL.getBuilding().getStartPositionAfterBuilding(floorStart);
+        // So u can't see customer when he spawns
+        if (startPosition.x == 0) {
+            startPosition.x -= CUSTOMERS_SETTINGS.CUSTOMER_SIZE.x * 2;
         } else {
-            start_position.x += CUSTOMERS_SETTINGS.CUSTOMER_SIZE.x * 2;
+            startPosition.x += CUSTOMERS_SETTINGS.CUSTOMER_SIZE.x * 2;
         }
-        return start_position;
+        return startPosition;
     }
 }

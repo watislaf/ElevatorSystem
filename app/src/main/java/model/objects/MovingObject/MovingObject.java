@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.awt.*;
+import java.util.Vector;
 
 public class MovingObject extends Creature {
     protected static final int SPEED_COEFFICIENT = 1000;
@@ -48,4 +49,8 @@ public class MovingObject extends Creature {
         this.destination = destination;
     }
 
+    public void setPosition(Vector2D newPosition) {
+        destination = destination.add(newPosition.sub(position));
+        position = newPosition;
+    }
 }

@@ -3,10 +3,10 @@ package connector.clientServer;
 import connector.protocol.ProtocolMessage;
 import lombok.RequiredArgsConstructor;
 
-import java.util.concurrent.TimeUnit;
-import java.io.ObjectOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This class can connect to the Server,
@@ -21,6 +21,7 @@ public class Client {
     private final SocketEventListener SOCKET_EVENT_LISTENER;
     private ObjectOutputStream objectOutputStream;
     private Socket serversSocket;
+    private StreamReader streamReader;
 
     public void reconect() throws InterruptedException {
         while (true) {
@@ -29,7 +30,8 @@ public class Client {
                 objectOutputStream = new ObjectOutputStream(serversSocket.getOutputStream());
 
                 SOCKET_EVENT_LISTENER.onNewSocketConnection(new SocketCompactData(objectOutputStream, serversSocket));
-                new StreamReader(serversSocket, SOCKET_EVENT_LISTENER).start();
+                streamReader = new StreamReader(serversSocket, SOCKET_EVENT_LISTENER);
+                streamReader.start();
                 return;
             } catch (IOException ignored) {
             }
@@ -48,7 +50,6 @@ public class Client {
         if (serversSocket == null) {
             return true;
         }
-        return serversSocket.isOutputShutdown() ||
-                serversSocket.isClosed();
+        return !streamReader.isAlive();
     }
 }

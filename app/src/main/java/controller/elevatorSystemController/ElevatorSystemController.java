@@ -21,19 +21,22 @@ public class ElevatorSystemController {
     public final ElevatorSystemSettings SETTINGS = new ElevatorSystemSettings();
 
     private final LinkedList<ElevatorRequest> PENDING_ELEVATOR_REQUESTS = new LinkedList<>();
-    private final Building DEFAULT_BUILDING = new Building(SETTINGS);
+    private final Building BUILDING = new Building(SETTINGS);
     private final Controller CONTROLLER;
     private final Model MODEL;
 
     public ElevatorSystemController(Controller controller) {
         this.CONTROLLER = controller;
         this.MODEL = CONTROLLER.MODEL;
-        MODEL.Initialize(DEFAULT_BUILDING);
+        MODEL.Initialize(BUILDING);
     }
 
     public void tick(long deltaTime) {
         PENDING_ELEVATOR_REQUESTS.removeIf(this::tryToCallElevator);
         for (var elevator : MODEL.getBuilding().ELEVATORS) {
+            if (!elevator.isVisible()) {
+                break;
+            }
             switch (elevator.getState()) {
                 case WAIT -> processWait(elevator);
                 case IN_MOTION -> processInMotion(elevator);
@@ -119,21 +122,21 @@ public class ElevatorSystemController {
         Elevator closestElevator = elevatorsAvailable.stream()
                 .reduce(null, (elevatorA, elevatorB) -> this.closestElevator(request, elevatorA, elevatorB));
 
-        var requestFloor = (int) Math.round(request.button_position().y / DEFAULT_BUILDING.WALL_SIZE);
+        var requestFloor = (int) Math.round(request.button_position().y / BUILDING.getWallSize());
         closestElevator.addFloorToPickUp(requestFloor);
         closestElevator.findBestFloor();
         return true;
     }
 
     private Elevator closestElevator(ElevatorRequest request, Elevator elevatorA, Elevator elevatorB) {
-        if (elevatorA == null) {
+        if (elevatorA == null || !elevatorA.isVisible()) {
             return elevatorB;
         }
-        if (elevatorB == null) {
+        if (elevatorB == null || !elevatorB.isVisible()) {
             return elevatorA;
         }
 
-        var requestFloor = (int) Math.round(request.button_position().y / DEFAULT_BUILDING.WALL_SIZE);
+        var requestFloor = (int) Math.round(request.button_position().y / BUILDING.getWallSize());
         double timeToBeForElevatorA = elevatorA.getTimeToBeHere(requestFloor);
         double timeToBeForElevatorB = elevatorB.getTimeToBeHere(requestFloor);
         if (timeToBeForElevatorA > timeToBeForElevatorB) {
@@ -149,4 +152,17 @@ public class ElevatorSystemController {
         return elevatorB;
     }
 
+    public void changeElevatorsCount(boolean data) {
+        if (data) {
+            if (SETTINGS.getElevatorsCount() < SETTINGS.MAX_ELEVATORS_COUNT) {
+                SETTINGS.setElevatorsCount(SETTINGS.getElevatorsCount() + 1);
+                BUILDING.updateElevatorsPosition();
+                return;
+            }
+        }
+        if (SETTINGS.getElevatorsCount() > 0) {
+            SETTINGS.setElevatorsCount(SETTINGS.getElevatorsCount() - 1);
+            BUILDING.updateElevatorsPosition();
+        }
+    }
 }

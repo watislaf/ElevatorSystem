@@ -21,5 +21,6 @@ public enum Protocol {
 
     //-- FROM_CLIENT --//
     CREATE_CUSTOMER,                // LinkedList<Integer> size of 2 (start floor and end floor)
+    CHANGE_ELEVATORS_COUNT,         // bool ( add or remove elevator if possible)
 
 }

@@ -3,6 +3,7 @@ package view;
 
 
 import controller.WindowController;
+import drawable.ColorSettings;
 import model.WindowModel;
 
 import javax.swing.*;
@@ -16,7 +17,8 @@ public class SwingWindow {
     private WindowController controller;
     private SwingPanel startPanel;
     final Point WINDOW_SIZE = new Point(800, 800);
-    private final LinkedList<JButton> BUTTONS = new LinkedList<>();
+    private final LinkedList<JButton> ADD_CLIENT_BUTTONS = new LinkedList<>();
+    private final LinkedList<JButton> ADD_REDUCE_ELEVATORS_BUTTONS = new LinkedList<>();
 
     private JFrame frame;
     private Dimension resize;
@@ -30,20 +32,25 @@ public class SwingWindow {
     private void initializeButtons(WindowModel windowModel) {
         listener = new GuiActionListener(this);
         for (int i = 0; i < 16; i++) {
-            var start_button_ = new JButton("2");
-            start_button_.setSize(55, 55);
-            start_button_.addActionListener(listener);
-            start_button_.setBackground(windowModel.COLOR_SETTINGS.JBUTTONS_COLOR);
-            start_button_.setFocusPainted(false);
-            start_button_.setForeground(Color.white);
-            start_button_.setVisible(false);
-            start_button_.setEnabled(false);
-
-
-            startPanel.add(start_button_);
-            BUTTONS.add(start_button_);
+            var buttonCreated = createButton(
+                    "->", windowModel.COLOR_SETTINGS.JBUTTONS_COLOR);
+            buttonCreated.setVisible(false);
+            ADD_CLIENT_BUTTONS.add(buttonCreated);
         }
+        ADD_REDUCE_ELEVATORS_BUTTONS.add(createButton("^", windowModel.COLOR_SETTINGS.JBUTTONS_COLOR));
+        ADD_REDUCE_ELEVATORS_BUTTONS.add(createButton("v", windowModel.COLOR_SETTINGS.JBUTTONS_COLOR));
     }
+
+    private JButton createButton(String text, Color buttonColor) {
+        var startButton = new JButton(text);
+        startButton.addActionListener(listener);
+        startButton.setBackground(buttonColor);
+        startButton.setForeground(Color.white);
+        startButton.setFocusPainted(false);
+        startPanel.add(startButton);
+        return startButton;
+    }
+
 
     private void initializeWindow(WindowModel windowModel) {
         startPanel = new SwingPanel(windowModel);
@@ -64,7 +71,7 @@ public class SwingWindow {
 
     public void updateButtonsAndSliders(WindowModel windowMODEL) {
         resize = startPanel.getSize();
-        Iterator<JButton> button = BUTTONS.iterator();
+        Iterator<JButton> button = ADD_CLIENT_BUTTONS.iterator();
         double heightOfButton = (resize.height - 100.) / windowMODEL.getSettings().FLOORS_COUNT;
         for (int i = 0; i < 16; i++) {
             JButton currentButton = button.next();
@@ -78,7 +85,11 @@ public class SwingWindow {
             currentButton.setBounds(
                     new Rectangle(0, (int) heightOfButton * i + 50,
                             50, (int) heightOfButton));
-
+        }
+        for (int i = 0; i < 2; i++) {
+            ADD_REDUCE_ELEVATORS_BUTTONS.get(i).setBounds(
+                    new Rectangle(50, 50 + i * 100,
+                            50, 50));
         }
 
     }
@@ -91,13 +102,19 @@ public class SwingWindow {
     }
 
     public void clicked(JButton source) {
-        Iterator<JButton> button = BUTTONS.iterator();
+        Iterator<JButton> button = ADD_CLIENT_BUTTONS.iterator();
         for (int i = 0; i < 16; i++) {
             JButton currentButton = button.next();
             if (currentButton == source) {
-                controller.clickedButtonWithNumber(i);
+                controller.clickedAddCustomerButtonWithNumber(i);
                 return;
             }
+        }
+        if (ADD_REDUCE_ELEVATORS_BUTTONS.get(0) == source) {
+            controller.changeElevatorsCount(true);
+        }
+        if (ADD_REDUCE_ELEVATORS_BUTTONS.get(1) == source) {
+            controller.changeElevatorsCount(false);
         }
     }
 }

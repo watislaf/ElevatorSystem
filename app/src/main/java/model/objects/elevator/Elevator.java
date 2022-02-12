@@ -10,8 +10,8 @@ import tools.Timer;
 import java.util.*;
 
 /*
- * Elevator is store all requests under and behind his way, the algorithm find nearest by
- * calculating distance to came from floor A to floor B and all intermediate floors
+ * Elevator is storing all requests under and behind his way, the algorithm finds the closest floor by
+ * calculating distance to came from floor A to floor B and all intermediate floors.
  */
 public class Elevator extends MovingObject {
     public static final int UNEXISTING_FLOOR = 999;
@@ -19,7 +19,9 @@ public class Elevator extends MovingObject {
 
     private final long TIME_TO_STOP_ON_FLOOR;
     private final int MAX_HUMAN_CAPACITY;
-    private final double WALL_SIZE;
+
+    @Setter
+    private double wallSize;
 
     @Getter
     @Setter
@@ -81,17 +83,17 @@ public class Elevator extends MovingObject {
         return currentCustomersCount <= this.MAX_HUMAN_CAPACITY;
     }
 
-    public Elevator(Vector2D position, ElevatorSystemSettings settings, double wall_size) {
-        super(position, settings.ELEVATOR_SPEED, settings.ELEVATOR_SIZE);
+    public Elevator(ElevatorSystemSettings settings) {
+        super(new Vector2D(0, 0), settings.ELEVATOR_SPEED, settings.ELEVATOR_SIZE);
         this.TIME_TO_STOP_ON_FLOOR = settings.ELEVATOR_OPEN_CLOSE_TIME * 2 +
                 settings.ELEVATOR_AFTER_CLOSE_AFK_TIME + settings.ELEVATOR_WAIT_AS_OPENED_TIME;
         this.MAX_HUMAN_CAPACITY = settings.ELEVATOR_MAX_HUMAN_CAPACITY;
         this.state = ElevatorState.WAIT;
-        this.WALL_SIZE = wall_size;
     }
 
+
     public int getCurrentFloor() {
-        return (int) Math.round(position.y / WALL_SIZE);
+        return (int) Math.round(position.y / wallSize);
     }
 
     public boolean isOpened() {
@@ -122,7 +124,7 @@ public class Elevator extends MovingObject {
     }
 
     public void setFloorDestination(int bestFloor) {
-        setDestination(new Vector2D(position.x, bestFloor * WALL_SIZE));
+        setDestination(new Vector2D(position.x, bestFloor * wallSize));
     }
 
     public void arrived() {
@@ -164,7 +166,7 @@ public class Elevator extends MovingObject {
         Integer[] allBotSorted = (allBot).toArray(new Integer[allBot.size()]);
 
         // 5 6 7 9  on the way
-        //1 2 4not on the way
+        //1 2 4 not on the way
         double penalty;
         if (isGoUp) {
             if (position.y < getPositionForFloor(requestFloor)) {
@@ -175,22 +177,21 @@ public class Elevator extends MovingObject {
                         + allTopSorted.length - 1)
                         * TIME_TO_STOP_ON_FLOOR;
             }
-
-            return getTimeToGetTo(requestFloor) + penalty;
-        }
-        if (position.y > getPositionForFloor(requestFloor)) {
-            penalty = (allBotSorted.length - Arrays.binarySearch(allBotSorted, requestFloor) - 1)
-                    * TIME_TO_STOP_ON_FLOOR;
         } else {
-            penalty = getTimeToGetTo(allBotSorted[allBotSorted.length - 1]) * 2;
-            penalty += ((Arrays.binarySearch(allTopSorted, requestFloor) + allBotSorted.length - 1)
-                    * TIME_TO_STOP_ON_FLOOR);
+            if (position.y > getPositionForFloor(requestFloor)) {
+                penalty = (allBotSorted.length - Arrays.binarySearch(allBotSorted, requestFloor) - 1)
+                        * TIME_TO_STOP_ON_FLOOR;
+            } else {
+                penalty = getTimeToGetTo(allBotSorted[allBotSorted.length - 1]) * 2;
+                penalty += ((Arrays.binarySearch(allTopSorted, requestFloor) + allBotSorted.length - 1)
+                        * TIME_TO_STOP_ON_FLOOR);
+            }
         }
         return getTimeToGetTo(requestFloor) + penalty;
     }
 
     private double getPositionForFloor(int requestFloor) {
-        return requestFloor * WALL_SIZE;
+        return requestFloor * wallSize;
     }
 
     private double getTimeToGetTo(int requestFloor) {
@@ -199,5 +200,14 @@ public class Elevator extends MovingObject {
 
     public int getBooking() {
         return currentBookedCount + currentCustomersCount;
+    }
+
+    public void reset() {
+        PICK_UP_TOP.clear();
+        THROW_OUT_TOP.clear();
+        PICK_UP_BOTTOM.clear();
+        THROW_OUT_BOTTOM.clear();
+        TIMER.restart(0);
+        destination = position;
     }
 }

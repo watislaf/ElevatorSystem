@@ -31,19 +31,21 @@ public class DrawableElevator extends Creature implements Drawable {
 
     @Override
     public void draw(GameDrawer gameDrawer) {
+        if (!isVisible()) {
+            return;
+        }
         if (DOORS.isClosed()) {
             return;
         }
         gameDrawer.setColor(BACK_GROUND_COLOR);
-//        gameDrawer.fillRect(interpolationPosition.sub(new Vector2D(this.size.x / 2., 0)), this.size);
         gameDrawer.fillRect(position.sub(new Vector2D(this.size.x / 2., 0)), this.size);
     }
 
     @Override
     public void tick(long delta_time) {
 //        interpolationPosition = interpolationPosition
- //               .trendTo(position, position.getVectorTo(interpolationPosition)
-  //                      .getLength() * delta_time / serverRespondTime);
+        //               .trendTo(position, position.getVectorTo(interpolationPosition)
+        //                      .getLength() * delta_time / serverRespondTime);
     }
 
 }
