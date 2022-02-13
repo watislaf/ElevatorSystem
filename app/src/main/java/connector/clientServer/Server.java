@@ -8,6 +8,8 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 /**
  * Clients connects to the Server, with usage of connection settings.
@@ -20,25 +22,30 @@ import java.util.LinkedList;
 public class Server extends Thread {
     private final SocketEventListener SOCKET_EVENT_LISTENER;
     private final LinkedList<SocketCompactData> CONNECTED_CLIENTS = new LinkedList<>();
+    private final Logger LOGGER = Logger.getLogger(Server.class.getName());
 
     @Override
     public void run() {
         try {
             var serverSocket = new ServerSocket(ConnectionSettings.PORT);
             while (true) {
-                System.out.println("accept");
+                LOGGER.info("wait until  new connection");
                 Socket clientSocket = serverSocket.accept();
-
                 var objectOutputStream = new ObjectOutputStream(clientSocket.getOutputStream());
                 var socketCompactData = new SocketCompactData(objectOutputStream, clientSocket);
                 synchronized (CONNECTED_CLIENTS) {
                     CONNECTED_CLIENTS.add(socketCompactData);
                 }
-                new StreamReader(clientSocket, SOCKET_EVENT_LISTENER).start();
+
+                var streamReader = new StreamReader(clientSocket, SOCKET_EVENT_LISTENER);
+                streamReader.start();
+
+                TimeUnit.MILLISECONDS.sleep(100);
                 SOCKET_EVENT_LISTENER.onNewSocketConnection(socketCompactData);
             }
         } catch (IOException exception) {
-            System.out.println("Server exception: " + exception.getMessage());
+            LOGGER.warning("Server exception: " + exception.getMessage());
+        } catch (InterruptedException ignored) {
         }
     }
 

@@ -1,7 +1,7 @@
 package view;
 
-import model.objects.MovingObject.Creature;
-import model.objects.MovingObject.Vector2D;
+import model.objects.movingObject.Creature;
+import model.objects.movingObject.Vector2D;
 
 import java.awt.*;
 /*

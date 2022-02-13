@@ -4,14 +4,16 @@ import connector.protocol.CreaturesData;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import model.objects.MovingObject.MovingObject;
+import model.objects.customer.CustomerWaitStatistic;
+import model.objects.movingObject.MovingObject;
 import model.objects.building.Building;
-import model.objects.custumer.Customer;
+import model.objects.customer.Customer;
 
 import java.util.LinkedList;
+import java.util.stream.Collectors;
 
 /*
-* Class to store common objects
+ * Class to store all objects.
  */
 @NoArgsConstructor
 public class Model {
@@ -30,5 +32,12 @@ public class Model {
 
     public CreaturesData getDataToSent() {
         return new CreaturesData(CUSTOMERS, building.ELEVATORS);
+    }
+
+    public LinkedList<CustomerWaitStatistic> getStatisticBeforeCustomerIsDead() {
+        return CUSTOMERS.stream()
+                .filter(MovingObject::isDead)
+                .map(Customer::getStatistic)
+                .collect(Collectors.toCollection(LinkedList::new));
     }
 }

@@ -8,9 +8,9 @@ import drawable.drawableObjects.*;
 import drawable.drawableObjects.Button;
 import lombok.Getter;
 import lombok.Setter;
-import model.objects.MovingObject.Creature;
-import model.objects.MovingObject.MovingObject;
-import model.objects.MovingObject.Vector2D;
+import model.objects.movingObject.Creature;
+import model.objects.movingObject.MovingObject;
+import model.objects.movingObject.Vector2D;
 
 import java.awt.*;
 import java.util.Collection;
@@ -38,8 +38,8 @@ public class WindowModel {
     private boolean needToInitialize = true;
 
     public void updateData(CreaturesData data) {
-        this.applyArryvedData(data.ELEVATORS, elevators);
-        this.applyArryvedData(data.CUSTOMERS, customers);
+        this.applyArrivedData(data.ELEVATORS, elevators);
+        this.applyArrivedData(data.CUSTOMERS, customers);
 
         // Add
         data.ELEVATORS.forEach(
@@ -98,7 +98,8 @@ public class WindowModel {
         needToInitialize = false;
     }
 
-    private <T extends Creature> void applyArryvedData(LinkedList<Creature> creatures_came, LinkedList<T> creatures_to_apply) {
+    private void applyArrivedData(LinkedList<Creature> creatures_came,
+                                  LinkedList<? extends Creature> creatures_to_apply) {
         // erease
         creatures_to_apply.removeIf(
                 creatureA -> creatures_came.stream().noneMatch(

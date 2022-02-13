@@ -2,7 +2,7 @@ package view;
 
 import lombok.RequiredArgsConstructor;
 import model.WindowModel;
-import model.objects.MovingObject.Vector2D;
+import model.objects.movingObject.Vector2D;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,11 +1,10 @@
-package model.objects.MovingObject;
+package model.objects.movingObject;
 
 
 import lombok.Getter;
 import lombok.Setter;
 
 import java.awt.*;
-import java.util.Vector;
 
 public class MovingObject extends Creature {
     protected static final int SPEED_COEFFICIENT = 1000;

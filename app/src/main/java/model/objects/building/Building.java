@@ -3,7 +3,7 @@ package model.objects.building;
 import controller.elevatorSystemController.ElevatorSystemSettings;
 import lombok.Getter;
 import model.objects.elevator.Elevator;
-import model.objects.MovingObject.Vector2D;
+import model.objects.movingObject.Vector2D;
 
 import java.util.LinkedList;
 import java.util.Random;

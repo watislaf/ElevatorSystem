@@ -1,7 +1,7 @@
-package model.objects.custumer;
+package model.objects.customer;
 
-import model.objects.MovingObject.MovingObject;
-import model.objects.MovingObject.Vector2D;
+import model.objects.movingObject.MovingObject;
+import model.objects.movingObject.Vector2D;
 import model.objects.elevator.Elevator;
 import lombok.Setter;
 import lombok.Getter;
@@ -12,16 +12,14 @@ import java.awt.Point;
 
 @Getter
 public class Customer extends MovingObject {
-    private final Timer TIMER = new Timer();
+    public Timer MAIN_TIMER = new Timer();
     private final int FLOOR_TO_END;
-
-    @Setter
-    private CustomerState state = CustomerState.GO_TO_BUTTON;
     @Setter
     private int currentFlor;
-
     private Elevator currentElevator;
     private double lastCurrentElevatorXPosition;
+    private CustomerState state = CustomerState.GO_TO_BUTTON;
+    private final CustomerStatisticCreator WAIT_STATISTIC = new CustomerStatisticCreator();
 
     public Customer(int currentFlor, int floorEnd, Vector2D position, double speed, Point size) {
         super(position, speed, size);
@@ -32,7 +30,8 @@ public class Customer extends MovingObject {
     @Override
     public void tick(long deltaTime) {
         super.tick(deltaTime);
-        TIMER.tick(deltaTime);
+        MAIN_TIMER.tick(deltaTime);
+        WAIT_STATISTIC.tick(deltaTime);
         if (currentElevator != null) {
             position.y = currentElevator.getPosition().y;
             if (lastCurrentElevatorXPosition != currentElevator.getPosition().x) {
@@ -42,6 +41,8 @@ public class Customer extends MovingObject {
             if (currentElevator.isInMotion()) {
                 setCurrentFlor(currentElevator.getCurrentFloor());
                 setVisible(false);
+            } else {
+                setVisible(true);
             }
             if (!currentElevator.isVisible()) {
                 isDead = true;
@@ -61,5 +62,22 @@ public class Customer extends MovingObject {
 
     public boolean wantsGoUp() {
         return currentFlor < FLOOR_TO_END;
+    }
+
+    public void setState(CustomerState state) {
+        this.state = state;
+        if (state == CustomerState.WAIT_UNTIL_ARRIVED) {
+            WAIT_STATISTIC.buttonClicked();
+        }
+        if (state == CustomerState.STAY_IN) {
+            WAIT_STATISTIC.getInToElevator();
+        }
+        if (state == CustomerState.GET_OUT) {
+            WAIT_STATISTIC.getOutOfElevator();
+        }
+    }
+
+    public CustomerWaitStatistic getStatistic() {
+        return WAIT_STATISTIC.STATISTIC;
     }
 }

@@ -6,7 +6,7 @@ plugins {
 group 'app'
 version '1.0-SNAPSHOT'
 
-mainClassName="controller.Main"
+mainClassName = "controller.Main"
 
 repositories {
     mavenCentral()
@@ -15,6 +15,9 @@ repositories {
 jar {
     manifest.attributes("Main-Class": "mainClassName");
 }
+test {
+    useJUnitPlatform()
+}
 
 dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.22'
@@ -22,6 +25,15 @@ dependencies {
 
     testCompileOnly 'org.projectlombok:lombok:1.18.22'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
+    testImplementation "org.mockito:mockito-core:3.+"
+
+    compileOnly 'org.apache.logging.log4j:log4j-api:2.17.1'
+    compileOnly 'org.apache.logging.log4j:log4j-core:2.17.1'
+
+    testCompileOnly 'org.apache.logging.log4j:log4j-api:2.17.1'
+    testCompileOnly 'org.apache.logging.log4j:log4j-core:2.17.1'
 }
 
 sourceCompatibility = JavaVersion.VERSION_17

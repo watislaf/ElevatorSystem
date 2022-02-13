@@ -1,8 +1,8 @@
 package connector.protocol;
 
 import connector.clientServer.ConnectionSettings;
-import model.objects.MovingObject.Creature;
-import model.objects.custumer.Customer;
+import model.objects.movingObject.Creature;
+import model.objects.customer.Customer;
 import model.objects.elevator.Elevator;
 
 import java.io.Serializable;

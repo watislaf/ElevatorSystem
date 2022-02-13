@@ -9,13 +9,18 @@ import connector.protocol.Protocol;
 import connector.protocol.ProtocolMessage;
 import controller.customerController.CustomersController;
 import controller.elevatorSystemController.ElevatorSystemController;
+import lombok.Getter;
 import lombok.Setter;
 import model.Model;
+import model.objects.customer.CustomerWaitStatistic;
 import tools.Timer;
 
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Main controller .
@@ -28,9 +33,17 @@ public class Controller implements SocketEventListener {
     public final Model MODEL;
 
     private final LinkedList<ProtocolMessage> MESSAGES = new LinkedList<>();
+    private final AtomicBoolean EXIT = new AtomicBoolean(false);
     private final CustomersController CUSTOMER_CONTROLLER;
     private final Timer TIMER_TO_CHECK_SERVER = new Timer();
     private final int TPS = 50;
+    @Getter
+    private double averageTimeCustomerToWaitInside = 0.;
+    @Getter
+    private double averageTimeCustomerToWaitOutside = 0.;
+    private Integer customersProcessedCount = 0;
+
+    @Setter
     private double gameSpeed = 1;
     @Setter
     private Server server;
@@ -53,27 +66,44 @@ public class Controller implements SocketEventListener {
         server.Send(client, message);
     }
 
+    public Controller() {
+        this(new Model());
+    }
+
     public Controller(Model model) {
         this.MODEL = model;
         this.ELEVATOR_SYSTEM_CONTROLLER = new ElevatorSystemController(this);
         this.CUSTOMER_CONTROLLER = new CustomersController(this);
     }
 
-    public void start() throws InterruptedException {
+    public void start() {
         currentTime = System.currentTimeMillis();
-        server.start();
+        if (server != null) {
+            server.start();
+        }
+
 
         while (true) {
+            if (EXIT.get()) {
+                return;
+            }
             long deltaTime = System.currentTimeMillis() - currentTime;
             currentTime += deltaTime;
 
             writeAndReadServerStream(deltaTime);
             tickControllers((long) (deltaTime * gameSpeed));
-            TimeUnit.MILLISECONDS.sleep(Math.round(1000. / TPS));
+            try {
+                TimeUnit.MILLISECONDS.sleep(Math.round(1000. / TPS));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     private void writeAndReadServerStream(long deltaTime) {
+        if (server == null) {
+            return;
+        }
         TIMER_TO_CHECK_SERVER.tick(deltaTime);
         if (TIMER_TO_CHECK_SERVER.isReady()) {
             server.Send(new ProtocolMessage(Protocol.UPDATE_DATA, MODEL.getDataToSent(), currentTime));
@@ -81,7 +111,7 @@ public class Controller implements SocketEventListener {
         }
 
         synchronized (MESSAGES) {
-            MESSAGES.forEach(this::processMessage);
+            MESSAGES.forEach(this::processMessageFromClient);
             MESSAGES.clear();
         }
     }
@@ -89,17 +119,40 @@ public class Controller implements SocketEventListener {
     private void tickControllers(long deltaTime) {
         CUSTOMER_CONTROLLER.tick(deltaTime);
         ELEVATOR_SYSTEM_CONTROLLER.tick(deltaTime);
+        updateStatistics();
         MODEL.clearDead();
     }
 
+    private void updateStatistics() {
+        LinkedList<CustomerWaitStatistic> statistics = MODEL.getStatisticBeforeCustomerIsDead();
+        if (statistics.isEmpty()) {
+            return;
+        }
+        averageTimeCustomerToWaitInside = updateAverage(statistics,
+                averageTimeCustomerToWaitInside, CustomerWaitStatistic::getWaitToGetInTime);
+        averageTimeCustomerToWaitOutside = updateAverage(statistics,
+                averageTimeCustomerToWaitOutside, CustomerWaitStatistic::getWaitToGetOutTime);
+        customersProcessedCount += statistics.size();
+    }
+
+    private Double updateAverage(LinkedList<CustomerWaitStatistic> statistics,
+                                 double timeToProcess, Function<CustomerWaitStatistic, Long> getterFunction) {
+        double averageTimeToAdd = statistics.stream()
+                .map(getterFunction)
+                .collect(Collectors.averagingLong(Long::longValue));
+        int newCustomersProcessedCount = customersProcessedCount + statistics.size();
+        averageTimeToAdd /= newCustomersProcessedCount;
+        timeToProcess *= customersProcessedCount * 1. / newCustomersProcessedCount;
+        timeToProcess += averageTimeToAdd;
+        return timeToProcess;
+    }
+
     @SuppressWarnings("unchecked")
-    private void processMessage(ProtocolMessage protocolMessage) {
+    private void processMessageFromClient(ProtocolMessage protocolMessage) {
         switch (protocolMessage.protocol()) {
             case CREATE_CUSTOMER -> {
-                if (protocolMessage.data() instanceof LinkedList) {
-                    LinkedList<Integer> floors = (LinkedList<Integer>) protocolMessage.data();
-                    CUSTOMER_CONTROLLER.CreateCustomer(floors.get(1), floors.get(0));
-                }
+                LinkedList<Integer> floors = (LinkedList<Integer>) protocolMessage.data();
+                CUSTOMER_CONTROLLER.CreateCustomer(floors.get(1), floors.get(0));
             }
             case CHANGE_ELEVATORS_COUNT -> {
                 ELEVATOR_SYSTEM_CONTROLLER.changeElevatorsCount((boolean) protocolMessage.data());
@@ -120,6 +173,13 @@ public class Controller implements SocketEventListener {
     }
 
     public void Send(Protocol protocol, Serializable data) {
+        if (server == null) {
+            return;
+        }
         server.Send(new ProtocolMessage(protocol, data, currentTime));
+    }
+
+    public void stop() {
+        EXIT.set(true);
     }
 }

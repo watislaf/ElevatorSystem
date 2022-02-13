@@ -1,4 +1,4 @@
-package model.objects.MovingObject;
+package model.objects.movingObject;
 
 import lombok.NoArgsConstructor;
 

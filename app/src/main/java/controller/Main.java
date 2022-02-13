@@ -3,15 +3,13 @@ package controller;
 import connector.clientServer.Server;
 import model.Model;
 
+import java.util.Optional;
+
 public class Main {
     public static void main(String[] args) {
-        Model model = new Model();
-        Controller controller = new Controller(model);
+        Controller controller = new Controller();
         Server server = new Server(controller);
         controller.setServer(server);
-        try {
-            controller.start();
-        } catch (InterruptedException ignored) {
-        }
+        controller.start();
     }
 }

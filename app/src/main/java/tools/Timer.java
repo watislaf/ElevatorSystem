@@ -1,30 +1,32 @@
 package tools;
 
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 public class Timer {
-    private long current_time;
-    private long counter_time;
+    @Getter
+    private long currentTimer;
+    private long counterTime;
 
     public void tick(long deltaTime) {
-        current_time -= deltaTime;
+        currentTimer -= deltaTime;
     }
 
 
     public boolean isReady() {
-        return current_time <= 0;
+        return currentTimer <= 0;
     }
 
     public void restart(long timeToCount) {
-        current_time = timeToCount;
-        counter_time = timeToCount;
+        currentTimer = timeToCount;
+        counterTime = timeToCount;
     }
 
     public double getPercent() {
-        if (current_time <= 0) {
+        if (currentTimer <= 0) {
             return 0;
         }
-        return current_time * 1. / counter_time;
+        return currentTimer * 1. / counterTime;
     }
 }

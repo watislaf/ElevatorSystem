@@ -7,6 +7,8 @@ import lombok.SneakyThrows;
 import java.io.ObjectInputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 /**
  * Class in thread read stream and return object to the event listener
@@ -18,12 +20,14 @@ import java.net.Socket;
 public class StreamReader extends Thread {
     private final Socket SOCKET;
     private final SocketEventListener SOCKET_EVENT_LISTENER;
+    private final Logger LOGGER = Logger.getLogger(StreamReader.class.getName());
 
     @Override
     @SneakyThrows
     public void run() {
         try {
             ObjectInputStream objectInputStream = new ObjectInputStream(SOCKET.getInputStream());
+
             while (true) {
                 ProtocolMessage message = (ProtocolMessage) objectInputStream.readObject();
                 SOCKET_EVENT_LISTENER.onReceiveSocket(message);
@@ -31,9 +35,10 @@ public class StreamReader extends Thread {
                     break;
                 }
             }
-        } catch (IOException | ClassNotFoundException ignored) {
+        } catch (IOException | ClassNotFoundException exception) {
             SOCKET.close();
-            System.out.println("Disconnect");
+            LOGGER.info("Disconnected");
+            exception.printStackTrace();
         }
     }
 }

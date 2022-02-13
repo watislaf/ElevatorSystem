@@ -1,14 +1,11 @@
 package controller;
 
-import connector.clientServer.ConnectionSettings;
-import connector.clientServer.SocketEventListener;
-import connector.clientServer.SocketCompactData;
+import connector.clientServer.*;
 import drawable.drawableObjects.FlyingText;
-import model.objects.MovingObject.Vector2D;
+import model.objects.movingObject.Vector2D;
 import connector.protocol.ProtocolMessage;
 import connector.protocol.CreaturesData;
 import connector.protocol.SettingsData;
-import connector.clientServer.Client;
 import connector.protocol.Protocol;
 import model.WindowModel;
 import view.SwingWindow;
@@ -16,6 +13,7 @@ import lombok.Setter;
 
 import java.util.concurrent.TimeUnit;
 import java.util.LinkedList;
+import java.util.logging.Logger;
 
 /*
  * control window, created with Swing
@@ -33,6 +31,8 @@ public class WindowController implements SocketEventListener {
     private long currentTime;
     private int lastFloorButtonClickedNumber = -1;
     private double gameSpeed = 1;
+
+    private final Logger LOGGER = Logger.getLogger(WindowController.class.getName());
 
     public WindowController(WindowModel windowModel) {
         WINDOW_MODEL = windowModel;
@@ -55,7 +55,7 @@ public class WindowController implements SocketEventListener {
 
     @Override
     public void onNewSocketConnection(SocketCompactData message) {
-        System.out.println("Connected");
+        LOGGER.info("Connected");
     }
 
     public void start() throws InterruptedException {
@@ -81,10 +81,10 @@ public class WindowController implements SocketEventListener {
         }
     }
 
-    private void clientConnectReadWrite() throws InterruptedException {
+    private void clientConnectReadWrite()  {
         if (client.isClosed()) {
             WINDOW_MODEL.clear();
-            client.reconect();
+            client.reconnect();
         }
         synchronized (MESSAGE) {
             MESSAGE.removeIf(this::processMessage);
@@ -101,8 +101,8 @@ public class WindowController implements SocketEventListener {
             case APPLICATION_SETTINGS -> {
                 SettingsData settings = (SettingsData) message.data();
                 if (!ConnectionSettings.VERSION.equals(settings.VERSION)) {
-                    System.out.printf("You have different versions with sever. Your version: %s, server version %s%n",
-                            ConnectionSettings.VERSION, settings.VERSION);
+                    LOGGER.warning("You have different versions with sever. Your version: %s, server version %s%n"
+                            .formatted(ConnectionSettings.VERSION, settings.VERSION));
                     return true;
                 }
                 WINDOW_MODEL.setSettings(settings);

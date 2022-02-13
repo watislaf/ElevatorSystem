@@ -1,8 +1,8 @@
 package drawable.drawableObjects;
 
 import drawable.Drawable;
-import model.objects.MovingObject.Creature;
-import model.objects.MovingObject.Vector2D;
+import model.objects.movingObject.Creature;
+import model.objects.movingObject.Vector2D;
 import view.GameDrawer;
 
 import java.awt.*;

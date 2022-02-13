@@ -2,17 +2,15 @@ package controller.customerController;
 
 import controller.elevatorSystemController.ElevatorSystemController;
 import model.objects.elevator.ElevatorRequest;
-import model.objects.custumer.CustomerState;
-import model.objects.MovingObject.Vector2D;
-import model.objects.custumer.Customer;
+import model.objects.customer.CustomerState;
+import model.objects.movingObject.Vector2D;
+import model.objects.customer.Customer;
 import connector.protocol.Protocol;
 import controller.Controller;
 
 import java.util.Random;
 
 import tools.Timer;
-
-import javax.swing.*;
 
 /**
  * Manipulate all customers in game.
@@ -62,7 +60,7 @@ public class CustomersController {
         customer.setDestination(buttonPosition);
         if (customer.isReachedDestination()) {
             ELEVATOR_SYSTEM_CONTROLLER.buttonClick(new ElevatorRequest(customer.getPosition(), customer.wantsGoUp()));
-            customer.getTIMER().restart(CUSTOMERS_SETTINGS.TIME_TO_WAIT_AFTER_BUTTON_CLICK);
+            customer.MAIN_TIMER.restart(CUSTOMERS_SETTINGS.TIME_TO_WAIT_AFTER_BUTTON_CLICK);
             customer.setState(CustomerState.WAIT_UNTIL_ARRIVED);
             customer.setSpeedMultiPly(CUSTOMERS_SETTINGS.SLOW_SPEED_MULTIPLY);
         }
@@ -77,12 +75,12 @@ public class CustomersController {
             customer.setState(CustomerState.GET_IN);
             return;
         }
-        if (customer.getTIMER().isReady()) {
+        if (customer.getMAIN_TIMER().isReady()) {
             var getPositionToWalk = new Vector2D(
                     new Random().nextInt(0, ELEVATOR_SYSTEM_CONTROLLER.SETTINGS.BUILDING_SIZE.x),
                     customer.getPosition().y);
             customer.setSpeedMultiPly(CUSTOMERS_SETTINGS.SLOW_SPEED_MULTIPLY);
-            customer.getTIMER().restart(CUSTOMERS_SETTINGS.TIME_TO_WALK);
+            customer.getMAIN_TIMER().restart(CUSTOMERS_SETTINGS.TIME_TO_WALK);
             customer.setDestination(getPositionToWalk);
         }
     }

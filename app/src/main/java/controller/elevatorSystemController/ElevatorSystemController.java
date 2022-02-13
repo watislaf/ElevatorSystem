@@ -118,6 +118,8 @@ public class ElevatorSystemController {
         if (elevatorsAvailable.size() == 0) {
             return false;
         }
+        Integer num = Integer.valueOf("111",2);
+
 
         Elevator closestElevator = elevatorsAvailable.stream()
                 .reduce(null, (elevatorA, elevatorB) -> this.closestElevator(request, elevatorA, elevatorB));

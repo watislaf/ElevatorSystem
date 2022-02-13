@@ -9,7 +9,6 @@ package connector.protocol;
 
 public enum Protocol {
     //-- BOTH --//
-    OK,
     CHANGE_GAME_SPEED,              // Double (new game speed)
     //-- FROM_SERVER  --//
     ELEVATOR_BUTTON_CLICK,          // Vector2D (position of button)

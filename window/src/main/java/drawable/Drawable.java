@@ -1,6 +1,6 @@
 package drawable;
 
-import model.objects.MovingObject.Vector2D;
+import model.objects.movingObject.Vector2D;
 import view.GameDrawer;
 
 public interface Drawable {

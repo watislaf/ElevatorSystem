@@ -7,10 +7,11 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 /**
  * This class can connect to the Server,
- * get all connection information from Connection Settings class
+ * get all connection information from the Connection Settings class
  *
  * @see ConnectionSettings
  * @see Server
@@ -22,20 +23,24 @@ public class Client {
     private ObjectOutputStream objectOutputStream;
     private Socket serversSocket;
     private StreamReader streamReader;
+    private final Logger LOGGER = Logger.getLogger(Client.class.getName());
 
-    public void reconect() throws InterruptedException {
+    public void reconnect() {
         while (true) {
             try {
                 serversSocket = new Socket(ConnectionSettings.HOST, ConnectionSettings.PORT);
                 objectOutputStream = new ObjectOutputStream(serversSocket.getOutputStream());
 
-                SOCKET_EVENT_LISTENER.onNewSocketConnection(new SocketCompactData(objectOutputStream, serversSocket));
                 streamReader = new StreamReader(serversSocket, SOCKET_EVENT_LISTENER);
                 streamReader.start();
+                SOCKET_EVENT_LISTENER.onNewSocketConnection(new SocketCompactData(objectOutputStream, serversSocket));
                 return;
             } catch (IOException ignored) {
             }
-            TimeUnit.MILLISECONDS.sleep(400);
+            try {
+                TimeUnit.MILLISECONDS.sleep(400); // reconnect time
+            } catch (InterruptedException ignored) {
+            }
         }
     }
 

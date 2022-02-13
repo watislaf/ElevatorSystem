@@ -1,8 +1,8 @@
 package drawable.drawableObjects;
 
 import drawable.Drawable;
-import model.objects.MovingObject.MovingObject;
-import model.objects.MovingObject.Vector2D;
+import model.objects.movingObject.MovingObject;
+import model.objects.movingObject.Vector2D;
 import view.GameDrawer;
 import tools.Timer;
 
