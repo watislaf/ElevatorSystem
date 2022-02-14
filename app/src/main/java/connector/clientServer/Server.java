@@ -40,7 +40,7 @@ public class Server extends Thread {
                 var streamReader = new StreamReader(clientSocket, SOCKET_EVENT_LISTENER);
                 streamReader.start();
 
-                TimeUnit.MILLISECONDS.sleep(100);
+                TimeUnit.MILLISECONDS.sleep(300);
                 SOCKET_EVENT_LISTENER.onNewSocketConnection(socketCompactData);
             }
         } catch (IOException exception) {

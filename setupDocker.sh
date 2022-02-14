@@ -6,4 +6,4 @@ if [[ $( docker container ls | cut -d ' '  -f  1 | tail -1 ) != "CONTAINER" ]]; 
 fi;
 
 docker build ./ -t elevators
-docker run -d -p 6778:6778 elevators  gradle run &
+docker run -d --restart unless-stopped -p 6778:6778 elevators  gradle run &
