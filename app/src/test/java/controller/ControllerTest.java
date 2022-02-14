@@ -37,6 +37,8 @@ class ControllerTest {
 
     @Test
     public void garbage() {
+        ArrayList<Integer> are = new ArrayList<>(42);
+        System.out.println(are.size());
         Integer[] arr = {1, 2, 3};
         Integer[] arr2 = new Integer[4];
         //Arrays.stream(arr).parallel().isParallel();
@@ -80,6 +82,7 @@ class ControllerTest {
                     new BufferedReader(new FileReader("src/main/resources/input.txt"));
 
             StringBuilder content = new StringBuilder();
+
             String line;
 
             while ((line = reader2.readLine()) != null) {
@@ -89,6 +92,7 @@ class ControllerTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
     }
 
     @AfterEach

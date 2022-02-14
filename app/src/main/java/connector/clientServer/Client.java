@@ -2,6 +2,7 @@ package connector.clientServer;
 
 import connector.protocol.ProtocolMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -23,12 +24,13 @@ public class Client {
     private ObjectOutputStream objectOutputStream;
     private Socket serversSocket;
     private StreamReader streamReader;
-    private final Logger LOGGER = Logger.getLogger(Client.class.getName());
+    @Setter
+    private String host = ConnectionSettings.HOST;
 
     public void reconnect() {
         while (true) {
             try {
-                serversSocket = new Socket(ConnectionSettings.HOST, ConnectionSettings.PORT);
+                serversSocket = new Socket(host, ConnectionSettings.PORT);
                 objectOutputStream = new ObjectOutputStream(serversSocket.getOutputStream());
 
                 streamReader = new StreamReader(serversSocket, SOCKET_EVENT_LISTENER);

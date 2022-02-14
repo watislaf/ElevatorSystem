@@ -38,7 +38,7 @@ public class StreamReader extends Thread {
         } catch (IOException | ClassNotFoundException exception) {
             SOCKET.close();
             LOGGER.info("Disconnected");
-            exception.printStackTrace();
+//            exception.printStackTrace();
         }
     }
 }
