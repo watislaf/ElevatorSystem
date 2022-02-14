@@ -81,7 +81,7 @@ public class WindowController implements SocketEventListener {
         }
     }
 
-    private void clientConnectReadWrite()  {
+    private void clientConnectReadWrite() {
         if (client.isClosed()) {
             WINDOW_MODEL.clear();
             client.reconnect();
@@ -100,7 +100,7 @@ public class WindowController implements SocketEventListener {
         switch (message.protocol()) {
             case APPLICATION_SETTINGS -> {
                 SettingsData settings = (SettingsData) message.data();
-                if (!ConnectionSettings.VERSION.equals(settings.VERSION)) {
+                if (ConnectionSettings.VERSION != settings.VERSION) {
                     LOGGER.warning("You have different versions with sever. Your version: %s, server version %s%n"
                             .formatted(ConnectionSettings.VERSION, settings.VERSION));
                     return true;

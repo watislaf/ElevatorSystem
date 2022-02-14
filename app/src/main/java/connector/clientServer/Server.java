@@ -36,11 +36,11 @@ public class Server extends Thread {
                 synchronized (CONNECTED_CLIENTS) {
                     CONNECTED_CLIENTS.add(socketCompactData);
                 }
-
+                TimeUnit.MILLISECONDS.sleep(200);
                 var streamReader = new StreamReader(clientSocket, SOCKET_EVENT_LISTENER);
                 streamReader.start();
 
-                TimeUnit.MILLISECONDS.sleep(300);
+                TimeUnit.MILLISECONDS.sleep(200);
                 SOCKET_EVENT_LISTENER.onNewSocketConnection(socketCompactData);
             }
         } catch (IOException exception) {

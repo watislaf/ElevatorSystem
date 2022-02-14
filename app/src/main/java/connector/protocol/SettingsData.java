@@ -24,7 +24,7 @@ public class SettingsData implements Serializable {
     public final int ELEVATORS_COUNT;
     public final int FLOORS_COUNT;
     public final double GAME_SPEED;
-    public final String VERSION;
+    public final double VERSION;
 
     public SettingsData(ElevatorSystemSettings settingsElevator, CustomerSettings settingsCustomer, double gameSpeed) {
         BUTTON_RELATIVE_POSITION = settingsElevator.BUTTON_RELATIVE_POSITION;

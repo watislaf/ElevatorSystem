@@ -9,8 +9,8 @@ public class Main {
         var controller = new WindowController(windowModel);
         var client = new Client(controller);
         controller.setClient(client);
-        if (args.length != 0) {
-            client.setHost(args[0]);
+        if (args.length == 0) {
+            client.setHost("localhost");
         }
         try {
             controller.start();
