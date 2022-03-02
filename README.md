@@ -31,7 +31,7 @@ Download source files.
 if you don't have git, just download source
 from [this page](https://github.com/watislaf/chessbot/releases/tag/V1.0.1600Elo).
 ____
-## Build /-> Run
+## Build /-> Run (on your machine)
 
 ### Gradle
 
@@ -44,19 +44,25 @@ To build and run project u can either use gradle (if u have installed one)
   ./gradlew :window:run -Dorg.gradle.java.home="PATH_TO/openjdk-17.0.2"
  ```
 ____
-### Docker
 
-or use docker.
+## Build /-> Run (on your machine but with server)
 
+### if Docker is not installed on the server
+```bat
+  sudo bash ./installDocker  
+```
+
+### Docker is installed on the server
 ```bat
   sudo bash ./setupDocker  
 ```
 
-### Docker is not installed
+### Gradle on your desktop
 
 ```bat
-  sudo bash ./installDocker  
-```
+  ./gradlew :window:buld -Dorg.gradle.java.home="PATH_TO/openjdk-17.0.2"
+  ./gradlew :window:run -Dorg.gradle.java.home="PATH_TO/openjdk-17.0.2" --args="IP_OF_YOUR_SERVER"
+ ```
 _____
 
  
