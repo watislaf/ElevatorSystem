@@ -24,8 +24,8 @@ Still a lot of work to do.
 Download source files.
 
 ```bat
-  git clone https://github.com/watislaf/chessbot.git # install
-  cd ./chessbot
+  git clone https://github.com/watislaf/ElevatorSystem.git # install
+  cd ./ElevatorSystem
 ```
 
 if you don't have git, just download source
@@ -38,9 +38,11 @@ ____
 To build and run project u can either use gradle (if u have installed one)
 
 ```bat
+  ./gradlew :app:buld -Dorg.gradle.java.home="PATH_TO/openjdk-17.0.2"
+  ./gradlew :app:run -Dorg.gradle.java.home="PATH_TO/openjdk-17.0.2"
   ./gradlew :window:buld -Dorg.gradle.java.home="PATH_TO/openjdk-17.0.2"
   ./gradlew :window:run -Dorg.gradle.java.home="PATH_TO/openjdk-17.0.2"
-```
+ ```
 ____
 ### Docker
 
@@ -58,14 +60,6 @@ or use docker.
 _____
 
  
-
-## Uninstall
-
-It is also possible to uninstall the script (and all downloaded with this project libraries).
-
-```bat
-  bash ./unis.sh  
-```
 ### Authors
 
 * Vladislav Kozulin ([@watislaf](https://github.com/watislaf))
