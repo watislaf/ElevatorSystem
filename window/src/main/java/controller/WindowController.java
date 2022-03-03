@@ -29,7 +29,6 @@ public class WindowController implements SocketEventListener {
     @Setter
     private Client client;
     private long currentTime;
-    private int lastFloorButtonClickedNumber = -1;
     private double gameSpeed = 1;
 
     private final Logger LOGGER = Logger.getLogger(WindowController.class.getName());
@@ -129,17 +128,11 @@ public class WindowController implements SocketEventListener {
         return true;
     }
 
-    public void clickedAddCustomerButtonWithNumber(int newButtonCLickedNumber) {
-        newButtonCLickedNumber = WINDOW_MODEL.getSettings().FLOORS_COUNT - newButtonCLickedNumber - 1;
-        if (lastFloorButtonClickedNumber == -1) {
-            lastFloorButtonClickedNumber = newButtonCLickedNumber;
-            return;
-        }
+    public void clickedAddCustomerButtonWithNumber(int startFloorButtonNumber, int endFloorNumber) {
+        startFloorButtonNumber = WINDOW_MODEL.getSettings().FLOORS_COUNT - startFloorButtonNumber - 1;
         LinkedList<Integer> data = new LinkedList<>();
-        data.push(lastFloorButtonClickedNumber);
-        data.push(newButtonCLickedNumber);
-
-        lastFloorButtonClickedNumber = -1;
+        data.push(startFloorButtonNumber);
+        data.push(endFloorNumber - 1);
         client.send(new ProtocolMessage(Protocol.CREATE_CUSTOMER, data, currentTime));
     }
 

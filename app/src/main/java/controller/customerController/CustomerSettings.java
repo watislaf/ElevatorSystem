@@ -18,6 +18,6 @@ public class CustomerSettings implements Serializable {
     public final double FAST_SPEED_MULTIPLY = 1.5;
     public final double CUSTOMER_SPEED = 100;
     public final long TIME_TO_WALK = 3000;
-    public final int MAX_CUSTOMERS = 20;
+    public final int MAX_CUSTOMERS = 2;
     public final long SPAWN_RATE = 500;
 }

@@ -165,8 +165,8 @@ public class Elevator extends MovingObject {
         Integer[] allTopSorted = (allTop).toArray(new Integer[allTop.size()]);
         Integer[] allBotSorted = (allBot).toArray(new Integer[allBot.size()]);
 
-        // 5 6 7 9  on the way
-        //1 2 4 not on the way
+        // 3 5 6 7  9  on the way
+        // 1 2 3 4  not on the way
         double penalty;
         if (isGoUp) {
             if (position.y < getPositionForFloor(requestFloor)) {
